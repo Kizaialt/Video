@@ -1,58 +1,48 @@
 <!doctype html>
-<html lang="mn">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Real Estate Reel Generator</title>
+  <title>Reel Generator (Real Estate)</title>
   <style>
-    :root { --w: 1080; --h: 1920; }
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; background:#0b0d12; color:#e7e9ee; }
-    header { padding: 16px 18px; border-bottom: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.03); position: sticky; top: 0; }
-    h1 { margin: 0; font-size: 16px; font-weight: 700; letter-spacing: .2px; }
-    main { display: grid; grid-template-columns: 360px 1fr; gap: 16px; padding: 16px; }
-    .panel { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 14px; }
-    .panel h2 { margin: 0 0 10px; font-size: 13px; opacity: .9; }
-    label { display:block; font-size: 12px; opacity: .9; margin: 10px 0 6px; }
-    input, select, button {
-      width: 100%; box-sizing: border-box;
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin:0; background:#0b0d12; color:#e7e9ee; }
+    header { padding: 16px 18px; border-bottom: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.03); position: sticky; top: 0; z-index: 5; }
+    h1 { margin:0; font-size:16px; font-weight:800; }
+    main { display:grid; grid-template-columns: 390px 1fr; gap:16px; padding:16px; }
+    .panel { background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:14px; }
+    .panel h2 { margin:0 0 10px; font-size:13px; opacity:.9; }
+    label { display:block; font-size:12px; opacity:.9; margin:10px 0 6px; }
+    input, textarea, select, button {
+      width:100%; box-sizing:border-box;
       background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.12);
-      color: #e7e9ee;
-      border-radius: 10px;
-      padding: 10px 10px;
-      outline: none;
+      border:1px solid rgba(255,255,255,.12);
+      color:#e7e9ee;
+      border-radius:10px;
+      padding:10px;
+      outline:none;
     }
-    input[type="file"] { padding: 10px; }
-    .row { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    button { cursor:pointer; font-weight: 700; }
-    button.primary { background: #6d5efc; border-color: rgba(255,255,255,.18); }
-    button:disabled { opacity: .55; cursor:not-allowed; }
-    .hint { font-size: 12px; opacity: .75; line-height: 1.4; margin-top: 8px; }
-    .previewWrap { display:flex; flex-direction: column; gap: 12px; }
-    .stage {
-      display:flex; align-items:flex-start; gap: 16px;
-      background: rgba(255,255,255,.02);
-      border: 1px dashed rgba(255,255,255,.18);
-      border-radius: 14px;
-      padding: 14px;
-    }
-    canvas { width: 270px; height: 480px; border-radius: 12px; background:#111; border:1px solid rgba(255,255,255,.12); }
-    video { width: 270px; height: 480px; border-radius: 12px; border:1px solid rgba(255,255,255,.12); background:#111; }
+    textarea { min-height: 120px; resize: vertical; line-height: 1.35; }
+    .row { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    button { cursor:pointer; font-weight:800; }
+    button.primary { background:#6d5efc; border-color: rgba(255,255,255,.18); }
+    button:disabled { opacity:.55; cursor:not-allowed; }
+    .hint { font-size:12px; opacity:.75; line-height:1.4; margin-top:8px; }
     .list { max-height: 260px; overflow:auto; border-top: 1px solid rgba(255,255,255,.08); margin-top: 12px; padding-top: 10px; }
     .thumb { display:flex; gap:10px; align-items:center; padding:8px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
-    .thumb img { width: 44px; height: 44px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,.10); }
-    .thumb div { font-size: 12px; opacity: .9; overflow:hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .pillPreview { display:flex; gap: 8px; align-items:center; margin-top: 10px; font-size: 12px; opacity: .9; }
-    .pillDot { width: 10px; height: 10px; border-radius: 99px; background: #2bd576; display:inline-block; }
+    .thumb img { width:44px; height:44px; object-fit:cover; border-radius:8px; border: 1px solid rgba(255,255,255,.10); }
+    .thumb div { font-size:12px; opacity:.9; overflow:hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .stage { background: rgba(255,255,255,.02); border: 1px dashed rgba(255,255,255,.18); border-radius:14px; padding:14px; display:flex; gap:14px; align-items:flex-start; flex-wrap: wrap; }
+    canvas { width: 324px; height: 576px; border-radius: 12px; background:#111; border:1px solid rgba(255,255,255,.12); }
+    video { width: 324px; height: 576px; border-radius: 12px; background:#111; border:1px solid rgba(255,255,255,.12); }
     @media (max-width: 980px){
       main { grid-template-columns: 1fr; }
-      canvas, video { width: 216px; height: 384px; }
+      canvas, video { width: 270px; height: 480px; }
     }
   </style>
 </head>
 <body>
 <header>
-  <h1>Real Estate Reel Generator (1080×1920)</h1>
+  <h1>Reel Generator (1080×1920 video)</h1>
 </header>
 
 <main>
@@ -60,44 +50,32 @@
     <h2>1) Upload photos</h2>
     <input id="files" type="file" accept="image/*" multiple />
     <div class="hint">
-      Exports: PNG frames ZIP + video (usually WebM).
-      This layout matches your screenshot: blurred background + sharp middle strip.
+      This generates a single Reel video from all photos. Add audio later in IG/TikTok.
+      Output is usually WebM because browsers love chaos.
     </div>
 
-    <h2 style="margin-top:16px;">2) Text</h2>
+    <h2 style="margin-top:16px;">2) Text + style</h2>
 
-    <label>Status</label>
+    <label>Status (pill)</label>
     <select id="status">
       <option value="Түрээс">Түрээс</option>
       <option value="Борлуулах">Борлуулах</option>
       <option value="Зарсан">Зарсан</option>
     </select>
 
-    <label>Title (center big)</label>
-    <input id="title" placeholder="AGARTA RESIDENCE" value="AGARTA RESIDENCE" />
+    <label>Bottom text block</label>
+    <textarea id="mainText" placeholder="🔑 БЗД-ийн урд “BayanzurkhApartment” хотхонд
+зохион байгуулалт сайтай 3 өрөө орон сууц худалдана.
 
-    <label>Details (center small)</label>
-    <input id="details" placeholder="2 өрөө | 45.97м²" value="2 өрөө | 45.97м²" />
+📞 8811-6639
+📐 66.8m²
+🛏️ 3 өрөө
+🏢 16/2 давхарт"></textarea>
 
     <div class="row">
-      <div>
-        <label>Accent color</label>
-        <input id="accent" type="color" value="#6d5efc" />
-      </div>
       <div>
         <label>Status color</label>
         <input id="statusColor" type="color" value="#2bd576" />
-      </div>
-    </div>
-
-    <h2 style="margin-top:16px;">3) Layout controls</h2>
-    <div class="row">
-      <div>
-        <label>Band fit</label>
-        <select id="fitMode">
-          <option value="cover" selected>Cover (crop, looks best)</option>
-          <option value="contain">Contain (no crop)</option>
-        </select>
       </div>
       <div>
         <label>Blur strength</label>
@@ -107,7 +85,27 @@
 
     <div class="row">
       <div>
-        <label>Slide seconds</label>
+        <label>Hero position</label>
+        <select id="heroPos">
+          <option value="upper" selected>Upper third</option>
+          <option value="top">Near top</option>
+          <option value="center">Center</option>
+        </select>
+      </div>
+      <div>
+        <label>Hero fit</label>
+        <select id="fitMode">
+          <option value="cover" selected>Cover (best)</option>
+          <option value="contain">Contain</option>
+        </select>
+      </div>
+    </div>
+
+    <h2 style="margin-top:16px;">3) Video settings</h2>
+
+    <div class="row">
+      <div>
+        <label>Seconds per photo</label>
         <input id="seconds" type="number" min="1" max="10" value="2" />
       </div>
       <div>
@@ -116,69 +114,92 @@
       </div>
     </div>
 
-    <div class="pillPreview"><span class="pillDot" id="pillDot"></span> <span id="pillText">Status preview</span></div>
+    <div class="row">
+      <div>
+        <label>Motion</label>
+        <select id="motion">
+          <option value="none">None (static)</option>
+          <option value="zoom" selected>Subtle zoom (recommended)</option>
+        </select>
+      </div>
+      <div>
+        <label>Zoom strength</label>
+        <input id="zoom" type="range" min="0" max="10" value="4" />
+      </div>
+    </div>
 
     <h2 style="margin-top:16px;">4) Export</h2>
     <div class="row">
-      <button id="btnFrames">Download PNG frames (ZIP)</button>
-      <button id="btnVideo" class="primary">Generate video</button>
+      <button id="btnPreview">Redraw preview</button>
+      <button id="btnVideo" class="primary">Generate Reel Video</button>
     </div>
-    <div class="hint" id="exportHint"></div>
+    <div class="hint" id="hint"></div>
 
     <div class="list" id="list"></div>
   </section>
 
-  <section class="panel previewWrap">
+  <section class="panel">
     <h2>Preview</h2>
     <div class="stage">
       <div>
-        <div class="hint" style="margin:0 0 8px;">Canvas preview</div>
+        <div class="hint" style="margin:0 0 8px;">Canvas (current slide)</div>
         <canvas id="canvas" width="1080" height="1920"></canvas>
       </div>
       <div>
-        <div class="hint" style="margin:0 0 8px;">Exported video preview</div>
+        <div class="hint" style="margin:0 0 8px;">Generated video preview</div>
         <video id="vid" controls muted playsinline></video>
         <div class="hint">
-          If your phone app hates WebM, export PNG frames and assemble to MP4 in CapCut (fastest practical workflow).
+          If IG refuses WebM on your device, convert once in CapCut (export MP4) and you’re done.
         </div>
       </div>
     </div>
   </section>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-
 <script>
 (() => {
   const W = 1080, H = 1920;
+
   const filesEl = document.getElementById('files');
-  const listEl  = document.getElementById('list');
+  const listEl = document.getElementById('list');
   const c = document.getElementById('canvas');
   const ctx = c.getContext('2d');
 
   const statusEl = document.getElementById('status');
-  const titleEl = document.getElementById('title');
-  const detailsEl = document.getElementById('details');
-  const accentEl = document.getElementById('accent');
+  const mainTextEl = document.getElementById('mainText');
   const statusColorEl = document.getElementById('statusColor');
-  const fitModeEl = document.getElementById('fitMode');
   const blurEl = document.getElementById('blur');
+  const heroPosEl = document.getElementById('heroPos');
+  const fitModeEl = document.getElementById('fitMode');
+
   const secondsEl = document.getElementById('seconds');
   const fpsEl = document.getElementById('fps');
+  const motionEl = document.getElementById('motion');
+  const zoomEl = document.getElementById('zoom');
 
-  const pillDot = document.getElementById('pillDot');
-  const pillText = document.getElementById('pillText');
-
-  const btnFrames = document.getElementById('btnFrames');
+  const btnPreview = document.getElementById('btnPreview');
   const btnVideo = document.getElementById('btnVideo');
-  const exportHint = document.getElementById('exportHint');
+  const hintEl = document.getElementById('hint');
   const vid = document.getElementById('vid');
 
   let slides = [];
   let currentIndex = 0;
 
-  function setHint(msg){ exportHint.textContent = msg || ""; }
-  function clamp(n, a, b){ return Math.max(a, Math.min(b, n)); }
+  function hint(msg){ hintEl.textContent = msg || ""; }
+
+  function fitRect(imgW, imgH, boxW, boxH, mode){
+    const imgAR = imgW / imgH;
+    const boxAR = boxW / boxH;
+    let w, h;
+    if(mode === 'cover'){
+      if(imgAR > boxAR){ h = boxH; w = h * imgAR; }
+      else { w = boxW; h = w / imgAR; }
+    } else {
+      if(imgAR > boxAR){ w = boxW; h = w / imgAR; }
+      else { h = boxH; w = h * imgAR; }
+    }
+    return { w, h, x:(boxW-w)/2, y:(boxH-h)/2 };
+  }
 
   function drawRoundedRect(ctx, x, y, w, h, r){
     r = Math.min(r, w/2, h/2);
@@ -189,20 +210,6 @@
     ctx.arcTo(x, y+h, x, y, r);
     ctx.arcTo(x, y, x+w, y, r);
     ctx.closePath();
-  }
-
-  function fitRect(imgW, imgH, boxW, boxH, mode){
-    const imgAR = imgW / imgH;
-    const boxAR = boxW / boxH;
-    let w, h;
-    if(mode === 'cover'){
-      if(imgAR > boxAR){ h = boxH; w = h * imgAR; }
-      else { w = boxW; h = w / imgAR; }
-    } else { // contain
-      if(imgAR > boxAR){ w = boxW; h = w / imgAR; }
-      else { h = boxH; w = h * imgAR; }
-    }
-    return { w, h, x: (boxW - w)/2, y: (boxH - h)/2 };
   }
 
   function textShadow(){
@@ -218,115 +225,98 @@
     ctx.shadowOffsetY = 0;
   }
 
-  // ✅ Reel-style layout matching your screenshot
+  function drawMultiline(text, x, y, maxWidth, lineHeight){
+    const lines = (text || "").split(/\n/);
+    for(const line of lines){
+      const words = line.split(/\s+/);
+      let cur = "";
+      for(const w of words){
+        const test = cur ? cur + " " + w : w;
+        if(ctx.measureText(test).width > maxWidth && cur){
+          ctx.fillText(cur, x, y);
+          y += lineHeight;
+          cur = w;
+        } else {
+          cur = test;
+        }
+      }
+      if(cur){
+        ctx.fillText(cur, x, y);
+        y += lineHeight;
+      } else {
+        y += lineHeight;
+      }
+    }
+    return y;
+  }
+
+  function getHeroY(heroH){
+    const mode = heroPosEl.value;
+    if(mode === "top") return 110;
+    if(mode === "center") return Math.round(H/2 - heroH/2 - 80);
+    return 170; // upper third default
+  }
+
+  // Core layout: blurred BG + 16:9 hero full width + bottom text panel, no border.
   function drawSlide(img){
     ctx.clearRect(0,0,W,H);
 
     const blurPx = Number(blurEl.value || 18);
 
-    // 1) Full background: cover + blur
+    // Background: blur cover
     ctx.save();
     ctx.filter = `blur(${blurPx}px)`;
     const bgFit = fitRect(img.naturalWidth, img.naturalHeight, W, H, 'cover');
     ctx.drawImage(img, bgFit.x, bgFit.y, bgFit.w, bgFit.h);
     ctx.restore();
 
-    // Dark overlay for contrast
-    ctx.fillStyle = 'rgba(0,0,0,0.28)';
+    // Contrast overlay
+    ctx.fillStyle = 'rgba(0,0,0,0.22)';
     ctx.fillRect(0,0,W,H);
 
-    // 2) Rounded outer frame
-    const outerPad = 70;
-    const outerX = outerPad;
-    const outerY = 90;
-    const outerW = W - outerPad*2;
-    const outerH = H - 180;
-
-    ctx.strokeStyle = 'rgba(255,255,255,0.22)';
-    ctx.lineWidth = 4;
-    drawRoundedRect(ctx, outerX, outerY, outerW, outerH, 52);
-    ctx.stroke();
-
-    // 3) Middle sharp strip (band)
-    const bandH = 520;
-    const bandY = Math.round(H/2 - bandH/2);
-    const bandX = outerX + 40;
-    const bandW = outerW - 80;
+    // Hero 16:9 full width
+    const heroW = W;
+    const heroH = Math.round(W * 9 / 16); // ~608px
+    const heroX = 0;
+    const heroY = getHeroY(heroH);
 
     ctx.save();
-    drawRoundedRect(ctx, bandX, bandY, bandW, bandH, 30);
-    ctx.clip();
-
-    const bandFitMode = fitModeEl.value || 'cover';
-    const bandFit = fitRect(img.naturalWidth, img.naturalHeight, bandW, bandH, bandFitMode);
     ctx.filter = 'none';
-    ctx.drawImage(img, bandX + bandFit.x, bandY + bandFit.y, bandFit.w, bandFit.h);
+    const heroFit = fitRect(img.naturalWidth, img.naturalHeight, heroW, heroH, fitModeEl.value || 'cover');
+    ctx.drawImage(img, heroX + heroFit.x, heroY + heroFit.y, heroFit.w, heroFit.h);
 
-    const bandFade = ctx.createLinearGradient(bandX, bandY, bandX, bandY+bandH);
-    bandFade.addColorStop(0.00, 'rgba(0,0,0,0.18)');
-    bandFade.addColorStop(0.25, 'rgba(0,0,0,0.00)');
-    bandFade.addColorStop(0.75, 'rgba(0,0,0,0.00)');
-    bandFade.addColorStop(1.00, 'rgba(0,0,0,0.20)');
-    ctx.fillStyle = bandFade;
-    ctx.fillRect(bandX, bandY, bandW, bandH);
-
+    // Hero fade edges
+    const heroFade = ctx.createLinearGradient(0, heroY, 0, heroY + heroH);
+    heroFade.addColorStop(0.00, 'rgba(0,0,0,0.18)');
+    heroFade.addColorStop(0.15, 'rgba(0,0,0,0.00)');
+    heroFade.addColorStop(0.85, 'rgba(0,0,0,0.00)');
+    heroFade.addColorStop(1.00, 'rgba(0,0,0,0.18)');
+    ctx.fillStyle = heroFade;
+    ctx.fillRect(heroX, heroY, heroW, heroH);
     ctx.restore();
 
-    // 4) Text overlays (centered on band)
+    // Bottom text zone
+    const panelTop = heroY + heroH + 40;
+    const padX = 70;
+
+    const panelGrad = ctx.createLinearGradient(0, panelTop - 120, 0, H);
+    panelGrad.addColorStop(0, 'rgba(0,0,0,0.00)');
+    panelGrad.addColorStop(1, 'rgba(0,0,0,0.62)');
+    ctx.fillStyle = panelGrad;
+    ctx.fillRect(0, panelTop - 120, W, H - (panelTop - 120));
+
+    // Status pill
     const status = (statusEl.value || "Түрээс").trim();
-    const title = (titleEl.value || "AGARTA RESIDENCE").trim();
-    const line2 = (detailsEl.value || "2 өрөө | 45.97м²").trim();
-    const accent = accentEl.value || "#6d5efc";
-
-    // Top-center chip
-    ctx.font = '700 34px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
-    const chipTextW = ctx.measureText(status).width;
-    const chipW = Math.ceil(chipTextW + 28);
-    const chipH = 54;
-    const chipX = Math.round(W/2 - chipW/2);
-    const chipY = bandY + 22;
-
-    ctx.fillStyle = 'rgba(0,0,0,0.55)';
-    drawRoundedRect(ctx, chipX, chipY, chipW, chipH, 999);
-    ctx.fill();
-
-    ctx.fillStyle = 'rgba(255,255,255,0.90)';
-    ctx.textBaseline = 'middle';
-    ctx.textAlign = 'left';
-    ctx.fillText(status, chipX + 14, chipY + chipH/2);
-
-    // Big title
-    ctx.save();
-    ctx.textAlign = 'center';
-    textShadow();
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '900 84px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
-    ctx.fillText(title.toUpperCase(), W/2, bandY + 220);
-    clearShadow();
-
-    // Underline accent (subtle, optional)
-    ctx.globalAlpha = 0.85;
-    ctx.fillStyle = accent;
-    ctx.fillRect(Math.round(W/2 - 190), bandY + 255, 380, 10);
-    ctx.globalAlpha = 1;
-
-    // Subtitle
-    textShadow();
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    ctx.font = '800 44px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
-    ctx.fillText(line2, W/2, bandY + 320);
-    clearShadow();
-    ctx.restore();
-
-    // 5) Bottom-left status pill
     const statusColor = statusColorEl.value || "#2bd576";
-    ctx.font = '800 44px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
+
+    ctx.font = '800 40px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
     const pillTextW = ctx.measureText(status).width;
-    const pillPadX = 26;
-    const pillH = 78;
+    const pillPadX = 22;
+    const pillH = 70;
     const pillW = Math.ceil(pillTextW + pillPadX*2);
-    const pillX = outerX + 34;
-    const pillY = outerY + outerH - 130;
+
+    const pillX = padX;
+    const pillY = panelTop + 10;
 
     ctx.fillStyle = 'rgba(0,0,0,0.35)';
     drawRoundedRect(ctx, pillX+6, pillY+10, pillW, pillH, 999);
@@ -336,16 +326,39 @@
     drawRoundedRect(ctx, pillX, pillY, pillW, pillH, 999);
     ctx.fill();
 
-    ctx.fillStyle = 'rgba(0,0,0,0.70)';
+    ctx.fillStyle = 'rgba(0,0,0,0.72)';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     ctx.fillText(status, pillX + pillPadX, pillY + pillH/2);
 
-    // Footer tiny
-    ctx.textAlign = 'left';
-    ctx.font = '500 26px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
-    ctx.fillStyle = 'rgba(255,255,255,0.35)';
-    ctx.fillText('Generated locally in your browser', outerX + 34, outerY + outerH - 40);
+    // Bottom text block
+    const text = (mainTextEl.value || "").trim();
+    let y = pillY + pillH + 44;
+
+    textShadow();
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.font = '700 40px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
+    drawMultiline(text, padX, y, W - padX*2, 54);
+    clearShadow();
+  }
+
+  // Motion wrapper (subtle zoom)
+  function drawSlideWithMotion(img, t){
+    const motion = motionEl.value;
+    if(motion !== 'zoom'){
+      drawSlide(img);
+      return;
+    }
+    const strength = Number(zoomEl.value || 4) / 100; // 0.00 - 0.10
+    const zoom = 1 + (strength * t); // 1 -> 1.04 default at 4
+    ctx.save();
+    ctx.clearRect(0,0,W,H);
+    ctx.translate(W/2, H/2);
+    ctx.scale(zoom, zoom);
+    ctx.translate(-W/2, -H/2);
+    drawSlide(img);
+    ctx.restore();
   }
 
   async function fileToImage(file){
@@ -353,7 +366,6 @@
     const img = new Image();
     img.decoding = 'async';
     img.loading = 'eager';
-    img.crossOrigin = 'anonymous';
     await new Promise((res, rej) => {
       img.onload = () => res();
       img.onerror = () => rej(new Error('Failed to load image'));
@@ -373,33 +385,23 @@
       meta.textContent = `${i+1}. ${s.name}`;
       row.appendChild(thumb);
       row.appendChild(meta);
-      row.onclick = () => {
-        currentIndex = i;
-        drawSlide(slides[currentIndex].img);
-      };
+      row.onclick = () => { currentIndex = i; redraw(); };
       listEl.appendChild(row);
     });
   }
 
-  function updatePillPreview(){
-    pillDot.style.background = statusColorEl.value;
-    pillText.textContent = `Status: ${statusEl.value}`;
-  }
-
   function redraw(){
-    updatePillPreview();
-    if(slides.length){
-      drawSlide(slides[currentIndex].img);
-    } else {
+    if(slides.length) drawSlide(slides[currentIndex].img);
+    else {
       ctx.clearRect(0,0,W,H);
       ctx.fillStyle = '#11131a';
       ctx.fillRect(0,0,W,H);
       ctx.fillStyle = 'rgba(255,255,255,0.7)';
-      ctx.font = '700 56px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
+      ctx.font = '800 56px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
       ctx.fillText('Upload listing photos', 90, 220);
       ctx.font = '500 36px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
       ctx.fillStyle = 'rgba(255,255,255,0.55)';
-      ctx.fillText('Then export frames or a reel video.', 90, 290);
+      ctx.fillText('Then generate a Reel video.', 90, 290);
     }
   }
 
@@ -414,32 +416,8 @@
     setTimeout(() => URL.revokeObjectURL(url), 2000);
   }
 
-  async function exportFramesZip(){
-    if(!slides.length) return;
-    btnFrames.disabled = true;
-    btnVideo.disabled = true;
-    setHint("Rendering PNG frames and zipping...");
-
-    const zip = new JSZip();
-    const folder = zip.folder("frames");
-
-    for(let i=0;i<slides.length;i++){
-      drawSlide(slides[i].img);
-      const blob = await new Promise(res => c.toBlob(res, 'image/png'));
-      folder.file(String(i+1).padStart(3,'0') + ".png", blob);
-      setHint(`Rendered frame ${i+1}/${slides.length}`);
-      await new Promise(r => setTimeout(r, 0));
-    }
-
-    const out = await zip.generateAsync({ type: "blob" });
-    await downloadBlob(out, "real_estate_frames.zip");
-    setHint("Downloaded: real_estate_frames.zip");
-
-    btnFrames.disabled = false;
-    btnVideo.disabled = false;
-  }
-
   function pickRecorderMime(){
+    // MP4 is usually not supported; WebM is most reliable.
     const candidates = [
       'video/mp4;codecs=h264',
       'video/mp4',
@@ -454,25 +432,29 @@
   }
 
   async function exportVideo(){
-    if(!slides.length) return;
-
-    const seconds = clamp(Number(secondsEl.value || 2), 1, 10);
-    const fps = clamp(Number(fpsEl.value || 30), 10, 60);
-    const framesPerSlide = Math.max(1, Math.round(seconds * fps));
-
-    btnFrames.disabled = true;
-    btnVideo.disabled = true;
-
-    const mime = pickRecorderMime();
-    if(!mime){
-      setHint("MediaRecorder not supported here. Use Chrome/Edge desktop.");
-      btnFrames.disabled = false;
-      btnVideo.disabled = false;
+    if(!slides.length){
+      hint("No photos. Upload first.");
       return;
     }
 
-    setHint(`Recording video... (${mime})`);
+    const seconds = Math.max(1, Math.min(10, Number(secondsEl.value || 2)));
+    const fps = Math.max(10, Math.min(60, Number(fpsEl.value || 30)));
+    const framesPerSlide = Math.max(1, Math.round(seconds * fps));
 
+    btnVideo.disabled = true;
+    btnPreview.disabled = true;
+
+    const mime = pickRecorderMime();
+    if(!mime){
+      hint("MediaRecorder not supported. Use Chrome/Edge desktop.");
+      btnVideo.disabled = false;
+      btnPreview.disabled = false;
+      return;
+    }
+
+    hint(`Recording... (${mime})`);
+
+    // Capture canvas stream
     const stream = c.captureStream(fps);
     const chunks = [];
     let rec;
@@ -480,9 +462,9 @@
     try{
       rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8_000_000 });
     } catch(e){
-      setHint("MediaRecorder failed to start. Try Chrome/Edge.");
-      btnFrames.disabled = false;
+      hint("MediaRecorder failed to start. Try Chrome/Edge.");
       btnVideo.disabled = false;
+      btnPreview.disabled = false;
       return;
     }
 
@@ -491,10 +473,12 @@
 
     rec.start(200);
 
-    for(let i=0;i<slides.length;i++){
-      setHint(`Recording slide ${i+1}/${slides.length}...`);
+    // Draw frames while recording
+    for(let i=0; i<slides.length; i++){
+      hint(`Recording slide ${i+1}/${slides.length}...`);
       for(let f=0; f<framesPerSlide; f++){
-        drawSlide(slides[i].img);
+        const t = f / framesPerSlide; // 0..1
+        drawSlideWithMotion(slides[i].img, t);
         await new Promise(r => setTimeout(r, 1000 / fps));
       }
     }
@@ -502,23 +486,25 @@
     rec.stop();
     await stopped;
 
-    const blob = new Blob(chunks, { type: mime.split(';')[0] || 'video/webm' });
-    const ext = (mime.includes('mp4')) ? 'mp4' : 'webm';
-    const filename = `real_estate_reel.${ext}`;
+    const type = mime.split(';')[0] || 'video/webm';
+    const blob = new Blob(chunks, { type });
+    const ext = mime.includes('mp4') ? 'mp4' : 'webm';
+    const filename = `reel_${W}x${H}.${ext}`;
 
+    // Preview
     const url = URL.createObjectURL(blob);
     vid.src = url;
 
     await downloadBlob(blob, filename);
-    setHint(`Downloaded: ${filename}`);
+    hint(`Downloaded: ${filename}`);
 
-    btnFrames.disabled = false;
     btnVideo.disabled = false;
+    btnPreview.disabled = false;
   }
 
   // Events
   filesEl.addEventListener('change', async () => {
-    const files = [...filesEl.files || []];
+    const files = [...(filesEl.files || [])];
     slides = [];
     listEl.innerHTML = "";
     vid.removeAttribute('src');
@@ -526,36 +512,32 @@
 
     if(!files.length){ redraw(); return; }
 
-    setHint("Loading images...");
-    btnFrames.disabled = true;
+    hint("Loading images...");
     btnVideo.disabled = true;
+    btnPreview.disabled = true;
 
     for(const f of files){
-      try{
-        slides.push(await fileToImage(f));
-      } catch(e){
-        console.error(e);
-      }
+      try { slides.push(await fileToImage(f)); }
+      catch(e){ console.error(e); }
     }
 
     currentIndex = 0;
     renderList();
     redraw();
-    setHint(`Loaded ${slides.length} image(s). Click thumbnails to preview.`);
 
-    btnFrames.disabled = false;
+    hint(`Loaded ${slides.length} image(s). Click a thumbnail to preview.`);
     btnVideo.disabled = false;
+    btnPreview.disabled = false;
   });
 
-  [statusEl, titleEl, detailsEl, accentEl, statusColorEl, fitModeEl, blurEl].forEach(el => {
+  btnPreview.addEventListener('click', redraw);
+  btnVideo.addEventListener('click', exportVideo);
+
+  [statusEl, mainTextEl, statusColorEl, blurEl, heroPosEl, fitModeEl, secondsEl, fpsEl, motionEl, zoomEl].forEach(el => {
     el.addEventListener('input', redraw);
     el.addEventListener('change', redraw);
   });
 
-  btnFrames.addEventListener('click', exportFramesZip);
-  btnVideo.addEventListener('click', exportVideo);
-
-  updatePillPreview();
   redraw();
 })();
 </script>
