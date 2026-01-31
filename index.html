@@ -50,8 +50,8 @@
     <h2>1) Upload photos</h2>
     <input id="files" type="file" accept="image/*" multiple />
     <div class="hint">
-      This generates a single Reel video from all photos. Add audio later in IG/TikTok.
-      Output is usually WebM because browsers love chaos.
+      Generates a single Reel video. Add audio later in IG/TikTok.
+      Output is usually WebM (browser limitation), sometimes MP4.
     </div>
 
     <h2 style="margin-top:16px;">2) Text + style</h2>
@@ -116,10 +116,10 @@
 
     <div class="row">
       <div>
-        <label>Motion</label>
+        <label>Hero motion</label>
         <select id="motion">
           <option value="none">None (static)</option>
-          <option value="zoom" selected>Subtle zoom (recommended)</option>
+          <option value="photo" selected>Photo only (recommended)</option>
         </select>
       </div>
       <div>
@@ -149,7 +149,7 @@
         <div class="hint" style="margin:0 0 8px;">Generated video preview</div>
         <video id="vid" controls muted playsinline></video>
         <div class="hint">
-          If IG refuses WebM on your device, convert once in CapCut (export MP4) and you’re done.
+          If IG refuses WebM on your device, convert once in CapCut to MP4.
         </div>
       </div>
     </div>
@@ -254,16 +254,16 @@
     const mode = heroPosEl.value;
     if(mode === "top") return 110;
     if(mode === "center") return Math.round(H/2 - heroH/2 - 80);
-    return 170; // upper third default
+    return 170;
   }
 
-  // Core layout: blurred BG + 16:9 hero full width + bottom text panel, no border.
-  function drawSlide(img){
+  // Draw stable background + stable text. We will draw HERO separately (optionally moving).
+  function drawSlideBase(img){
     ctx.clearRect(0,0,W,H);
 
     const blurPx = Number(blurEl.value || 18);
 
-    // Background: blur cover
+    // Background blur cover
     ctx.save();
     ctx.filter = `blur(${blurPx}px)`;
     const bgFit = fitRect(img.naturalWidth, img.naturalHeight, W, H, 'cover');
@@ -273,17 +273,41 @@
     // Contrast overlay
     ctx.fillStyle = 'rgba(0,0,0,0.22)';
     ctx.fillRect(0,0,W,H);
+  }
 
-    // Hero 16:9 full width
+  // Draw hero with optional motion, then draw bottom panel + pinned pill + text.
+  function drawSlidePhotoPinnedPill(img, t){
+    // t: 0..1 for motion. If no motion, pass 0.
+    drawSlideBase(img);
+
     const heroW = W;
-    const heroH = Math.round(W * 9 / 16); // ~608px
+    const heroH = Math.round(W * 9 / 16);
     const heroX = 0;
     const heroY = getHeroY(heroH);
 
+    // HERO base cover fit inside hero box
+    const baseFit = fitRect(img.naturalWidth, img.naturalHeight, heroW, heroH, fitModeEl.value || 'cover');
+
+    // Motion (photo only)
+    const motion = motionEl.value;
+    const strength = Number(zoomEl.value || 4) / 100; // 0..0.10
+    const useMotion = (motion === 'photo');
+
+    const z = useMotion ? (1 + strength * t) : 1;
+    const panX = useMotion ? ((t - 0.5) * 26) : 0;
+    const panY = useMotion ? ((0.5 - t) * 10) : 0;
+
+    const drawW = baseFit.w * z;
+    const drawH = baseFit.h * z;
+
+    // Center-correct then pan
+    const dx = heroX + baseFit.x - (drawW - baseFit.w)/2 + panX;
+    const dy = heroY + baseFit.y - (drawH - baseFit.h)/2 + panY;
+
+    // Draw hero sharp
     ctx.save();
     ctx.filter = 'none';
-    const heroFit = fitRect(img.naturalWidth, img.naturalHeight, heroW, heroH, fitModeEl.value || 'cover');
-    ctx.drawImage(img, heroX + heroFit.x, heroY + heroFit.y, heroFit.w, heroFit.h);
+    ctx.drawImage(img, dx, dy, drawW, drawH);
 
     // Hero fade edges
     const heroFade = ctx.createLinearGradient(0, heroY, 0, heroY + heroH);
@@ -295,7 +319,7 @@
     ctx.fillRect(heroX, heroY, heroW, heroH);
     ctx.restore();
 
-    // Bottom text zone
+    // Bottom text zone starts BELOW hero, but pill will overlap hero bottom edge
     const panelTop = heroY + heroH + 40;
     const padX = 70;
 
@@ -305,7 +329,7 @@
     ctx.fillStyle = panelGrad;
     ctx.fillRect(0, panelTop - 120, W, H - (panelTop - 120));
 
-    // Status pill
+    // ==== PILL pinned at hero bottom edge (half in, half out) ====
     const status = (statusEl.value || "Түрээс").trim();
     const statusColor = statusColorEl.value || "#2bd576";
 
@@ -316,24 +340,31 @@
     const pillW = Math.ceil(pillTextW + pillPadX*2);
 
     const pillX = padX;
-    const pillY = panelTop + 10;
 
+    // This is the key line: place pill so its center sits on hero bottom edge
+    // => half inside photo, half outside
+    const pillY = Math.round(heroY + heroH - pillH/2);
+
+    // shadow
     ctx.fillStyle = 'rgba(0,0,0,0.35)';
     drawRoundedRect(ctx, pillX+6, pillY+10, pillW, pillH, 999);
     ctx.fill();
 
+    // pill
     ctx.fillStyle = statusColor;
     drawRoundedRect(ctx, pillX, pillY, pillW, pillH, 999);
     ctx.fill();
 
+    // pill text
     ctx.fillStyle = 'rgba(0,0,0,0.72)';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     ctx.fillText(status, pillX + pillPadX, pillY + pillH/2);
 
-    // Bottom text block
+    // ==== Bottom text block ====
+    // Start text a bit below pill so it doesn't clash
     const text = (mainTextEl.value || "").trim();
-    let y = pillY + pillH + 44;
+    let y = Math.max(panelTop + 20, pillY + pillH + 34);
 
     textShadow();
     ctx.textBaseline = 'alphabetic';
@@ -341,24 +372,6 @@
     ctx.font = '700 40px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
     drawMultiline(text, padX, y, W - padX*2, 54);
     clearShadow();
-  }
-
-  // Motion wrapper (subtle zoom)
-  function drawSlideWithMotion(img, t){
-    const motion = motionEl.value;
-    if(motion !== 'zoom'){
-      drawSlide(img);
-      return;
-    }
-    const strength = Number(zoomEl.value || 4) / 100; // 0.00 - 0.10
-    const zoom = 1 + (strength * t); // 1 -> 1.04 default at 4
-    ctx.save();
-    ctx.clearRect(0,0,W,H);
-    ctx.translate(W/2, H/2);
-    ctx.scale(zoom, zoom);
-    ctx.translate(-W/2, -H/2);
-    drawSlide(img);
-    ctx.restore();
   }
 
   async function fileToImage(file){
@@ -391,8 +404,9 @@
   }
 
   function redraw(){
-    if(slides.length) drawSlide(slides[currentIndex].img);
-    else {
+    if(slides.length){
+      drawSlidePhotoPinnedPill(slides[currentIndex].img, 0);
+    } else {
       ctx.clearRect(0,0,W,H);
       ctx.fillStyle = '#11131a';
       ctx.fillRect(0,0,W,H);
@@ -417,7 +431,6 @@
   }
 
   function pickRecorderMime(){
-    // MP4 is usually not supported; WebM is most reliable.
     const candidates = [
       'video/mp4;codecs=h264',
       'video/mp4',
@@ -454,7 +467,6 @@
 
     hint(`Recording... (${mime})`);
 
-    // Capture canvas stream
     const stream = c.captureStream(fps);
     const chunks = [];
     let rec;
@@ -473,12 +485,11 @@
 
     rec.start(200);
 
-    // Draw frames while recording
     for(let i=0; i<slides.length; i++){
       hint(`Recording slide ${i+1}/${slides.length}...`);
       for(let f=0; f<framesPerSlide; f++){
         const t = f / framesPerSlide; // 0..1
-        drawSlideWithMotion(slides[i].img, t);
+        drawSlidePhotoPinnedPill(slides[i].img, t);
         await new Promise(r => setTimeout(r, 1000 / fps));
       }
     }
@@ -491,7 +502,6 @@
     const ext = mime.includes('mp4') ? 'mp4' : 'webm';
     const filename = `reel_${W}x${H}.${ext}`;
 
-    // Preview
     const url = URL.createObjectURL(blob);
     vid.src = url;
 
