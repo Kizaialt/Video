@@ -1,14 +1,14 @@
 <!doctype html>
-<html lang="en">
+<html lang="mn">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Reel Generator (Real Estate)</title>
+  <title>Real Estate Reel Generator</title>
   <style>
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin:0; background:#0b0d12; color:#e7e9ee; }
     header { padding: 16px 18px; border-bottom: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.03); position: sticky; top: 0; z-index: 5; }
     h1 { margin:0; font-size:16px; font-weight:800; }
-    main { display:grid; grid-template-columns: 390px 1fr; gap:16px; padding:16px; }
+    main { display:grid; grid-template-columns: 410px 1fr; gap:16px; padding:16px; }
     .panel { background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:14px; }
     .panel h2 { margin:0 0 10px; font-size:13px; opacity:.9; }
     label { display:block; font-size:12px; opacity:.9; margin:10px 0 6px; }
@@ -31,6 +31,7 @@
     .thumb { display:flex; gap:10px; align-items:center; padding:8px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
     .thumb img { width:44px; height:44px; object-fit:cover; border-radius:8px; border: 1px solid rgba(255,255,255,.10); }
     .thumb div { font-size:12px; opacity:.9; overflow:hidden; text-overflow: ellipsis; white-space: nowrap; }
+
     .stage { background: rgba(255,255,255,.02); border: 1px dashed rgba(255,255,255,.18); border-radius:14px; padding:14px; display:flex; gap:14px; align-items:flex-start; flex-wrap: wrap; }
     canvas { width: 324px; height: 576px; border-radius: 12px; background:#111; border:1px solid rgba(255,255,255,.12); }
     video { width: 324px; height: 576px; border-radius: 12px; background:#111; border:1px solid rgba(255,255,255,.12); }
@@ -42,7 +43,7 @@
 </head>
 <body>
 <header>
-  <h1>Reel Generator (1080×1920 video)</h1>
+  <h1>Real Estate Reel Generator (1080×1920)</h1>
 </header>
 
 <main>
@@ -50,8 +51,8 @@
     <h2>1) Upload photos</h2>
     <input id="files" type="file" accept="image/*" multiple />
     <div class="hint">
-      Generates a single Reel video. Add audio later in IG/TikTok.
-      Output is usually WebM (browser limitation), sometimes MP4.
+      Generates a single Reel video from all images. Add audio in Instagram/TikTok.
+      Output is usually WebM, sometimes MP4 depending on browser.
     </div>
 
     <h2 style="margin-top:16px;">2) Text + style</h2>
@@ -101,8 +102,19 @@
       </div>
     </div>
 
-    <h2 style="margin-top:16px;">3) Video settings</h2>
+    <h2 style="margin-top:16px;">3) Layout controls</h2>
+    <div class="row">
+      <div>
+        <label>Text Y offset (move up/down)</label>
+        <input id="textOffset" type="range" min="-400" max="400" value="0" />
+      </div>
+      <div>
+        <label>Text size</label>
+        <input id="textSize" type="range" min="30" max="52" value="40" />
+      </div>
+    </div>
 
+    <h2 style="margin-top:16px;">4) Video settings</h2>
     <div class="row">
       <div>
         <label>Seconds per photo</label>
@@ -128,7 +140,7 @@
       </div>
     </div>
 
-    <h2 style="margin-top:16px;">4) Export</h2>
+    <h2 style="margin-top:16px;">5) Export</h2>
     <div class="row">
       <button id="btnPreview">Redraw preview</button>
       <button id="btnVideo" class="primary">Generate Reel Video</button>
@@ -148,9 +160,7 @@
       <div>
         <div class="hint" style="margin:0 0 8px;">Generated video preview</div>
         <video id="vid" controls muted playsinline></video>
-        <div class="hint">
-          If IG refuses WebM on your device, convert once in CapCut to MP4.
-        </div>
+        <div class="hint">If IG refuses WebM, convert once in CapCut to MP4.</div>
       </div>
     </div>
   </section>
@@ -171,6 +181,9 @@
   const blurEl = document.getElementById('blur');
   const heroPosEl = document.getElementById('heroPos');
   const fitModeEl = document.getElementById('fitMode');
+
+  const textOffsetEl = document.getElementById('textOffset');
+  const textSizeEl = document.getElementById('textSize');
 
   const secondsEl = document.getElementById('seconds');
   const fpsEl = document.getElementById('fps');
@@ -257,27 +270,22 @@
     return 170;
   }
 
-  // Draw stable background + stable text. We will draw HERO separately (optionally moving).
   function drawSlideBase(img){
     ctx.clearRect(0,0,W,H);
-
     const blurPx = Number(blurEl.value || 18);
 
-    // Background blur cover
     ctx.save();
     ctx.filter = `blur(${blurPx}px)`;
     const bgFit = fitRect(img.naturalWidth, img.naturalHeight, W, H, 'cover');
     ctx.drawImage(img, bgFit.x, bgFit.y, bgFit.w, bgFit.h);
     ctx.restore();
 
-    // Contrast overlay
     ctx.fillStyle = 'rgba(0,0,0,0.22)';
     ctx.fillRect(0,0,W,H);
   }
 
-  // Draw hero with optional motion, then draw bottom panel + pinned pill + text.
-  function drawSlidePhotoPinnedPill(img, t){
-    // t: 0..1 for motion. If no motion, pass 0.
+  // MAIN RENDER: hero moves (clipped), pill pinned across hero bottom edge, text block movable by slider
+  function drawSlide(img, t){
     drawSlideBase(img);
 
     const heroW = W;
@@ -285,12 +293,10 @@
     const heroX = 0;
     const heroY = getHeroY(heroH);
 
-    // HERO base cover fit inside hero box
     const baseFit = fitRect(img.naturalWidth, img.naturalHeight, heroW, heroH, fitModeEl.value || 'cover');
 
-    // Motion (photo only)
     const motion = motionEl.value;
-    const strength = Number(zoomEl.value || 4) / 100; // 0..0.10
+    const strength = Number(zoomEl.value || 4) / 100;
     const useMotion = (motion === 'photo');
 
     const z = useMotion ? (1 + strength * t) : 1;
@@ -300,14 +306,17 @@
     const drawW = baseFit.w * z;
     const drawH = baseFit.h * z;
 
-    // Center-correct then pan
     const dx = heroX + baseFit.x - (drawW - baseFit.w)/2 + panX;
     const dy = heroY + baseFit.y - (drawH - baseFit.h)/2 + panY;
 
-    // Draw hero sharp
+    // ✅ CLIP hero so zoom doesn't create weird borders
     ctx.save();
+    ctx.beginPath();
+    ctx.rect(heroX, heroY, heroW, heroH);
+    ctx.clip();
     ctx.filter = 'none';
     ctx.drawImage(img, dx, dy, drawW, drawH);
+    ctx.restore();
 
     // Hero fade edges
     const heroFade = ctx.createLinearGradient(0, heroY, 0, heroY + heroH);
@@ -317,9 +326,8 @@
     heroFade.addColorStop(1.00, 'rgba(0,0,0,0.18)');
     ctx.fillStyle = heroFade;
     ctx.fillRect(heroX, heroY, heroW, heroH);
-    ctx.restore();
 
-    // Bottom text zone starts BELOW hero, but pill will overlap hero bottom edge
+    // Bottom panel gradient
     const panelTop = heroY + heroH + 40;
     const padX = 70;
 
@@ -329,7 +337,7 @@
     ctx.fillStyle = panelGrad;
     ctx.fillRect(0, panelTop - 120, W, H - (panelTop - 120));
 
-    // ==== PILL pinned at hero bottom edge (half in, half out) ====
+    // PILL pinned (half in/half out)
     const status = (statusEl.value || "Түрээс").trim();
     const statusColor = statusColorEl.value || "#2bd576";
 
@@ -340,37 +348,34 @@
     const pillW = Math.ceil(pillTextW + pillPadX*2);
 
     const pillX = padX;
-
-    // This is the key line: place pill so its center sits on hero bottom edge
-    // => half inside photo, half outside
     const pillY = Math.round(heroY + heroH - pillH/2);
 
-    // shadow
     ctx.fillStyle = 'rgba(0,0,0,0.35)';
     drawRoundedRect(ctx, pillX+6, pillY+10, pillW, pillH, 999);
     ctx.fill();
 
-    // pill
     ctx.fillStyle = statusColor;
     drawRoundedRect(ctx, pillX, pillY, pillW, pillH, 999);
     ctx.fill();
 
-    // pill text
     ctx.fillStyle = 'rgba(0,0,0,0.72)';
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     ctx.fillText(status, pillX + pillPadX, pillY + pillH/2);
 
-    // ==== Bottom text block ====
-    // Start text a bit below pill so it doesn't clash
+    // ✅ TEXT BLOCK with Y offset
     const text = (mainTextEl.value || "").trim();
-    let y = Math.max(panelTop + 20, pillY + pillH + 34);
+    const textSize = Number(textSizeEl.value || 40);
+    const offsetY = Number(textOffsetEl.value || 0);
+
+    // Start position: below pill OR below panel top, then apply offset
+    let y = Math.max(panelTop + 20, pillY + pillH + 34) + offsetY;
 
     textShadow();
     ctx.textBaseline = 'alphabetic';
     ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    ctx.font = '700 40px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
-    drawMultiline(text, padX, y, W - padX*2, 54);
+    ctx.font = `700 ${textSize}px system-ui, -apple-system, Segoe UI, Roboto, sans-serif`;
+    drawMultiline(text, padX, y, W - padX*2, Math.round(textSize * 1.35));
     clearShadow();
   }
 
@@ -404,9 +409,8 @@
   }
 
   function redraw(){
-    if(slides.length){
-      drawSlidePhotoPinnedPill(slides[currentIndex].img, 0);
-    } else {
+    if(slides.length) drawSlide(slides[currentIndex].img, 0);
+    else {
       ctx.clearRect(0,0,W,H);
       ctx.fillStyle = '#11131a';
       ctx.fillRect(0,0,W,H);
@@ -415,7 +419,7 @@
       ctx.fillText('Upload listing photos', 90, 220);
       ctx.font = '500 36px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
       ctx.fillStyle = 'rgba(255,255,255,0.55)';
-      ctx.fillText('Then generate a Reel video.', 90, 290);
+      ctx.fillText('Use Text Y offset to move text.', 90, 290);
     }
   }
 
@@ -488,8 +492,8 @@
     for(let i=0; i<slides.length; i++){
       hint(`Recording slide ${i+1}/${slides.length}...`);
       for(let f=0; f<framesPerSlide; f++){
-        const t = f / framesPerSlide; // 0..1
-        drawSlidePhotoPinnedPill(slides[i].img, t);
+        const t = f / framesPerSlide;
+        drawSlide(slides[i].img, t);
         await new Promise(r => setTimeout(r, 1000 / fps));
       }
     }
@@ -543,7 +547,11 @@
   btnPreview.addEventListener('click', redraw);
   btnVideo.addEventListener('click', exportVideo);
 
-  [statusEl, mainTextEl, statusColorEl, blurEl, heroPosEl, fitModeEl, secondsEl, fpsEl, motionEl, zoomEl].forEach(el => {
+  [
+    statusEl, mainTextEl, statusColorEl, blurEl, heroPosEl, fitModeEl,
+    textOffsetEl, textSizeEl,
+    secondsEl, fpsEl, motionEl, zoomEl
+  ].forEach(el => {
     el.addEventListener('input', redraw);
     el.addEventListener('change', redraw);
   });
