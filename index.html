@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Real Estate Reel Generator</title>
+  <title>Property Reel Generator</title>
   <style>
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin:0; background:#0b0d12; color:#e7e9ee; }
     header { padding: 16px 18px; border-bottom: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.03); position: sticky; top: 0; z-index: 5; }
     h1 { margin:0; font-size:16px; font-weight:800; }
-    main { display:grid; grid-template-columns: 410px 1fr; gap:16px; padding:16px; }
+    main { display:grid; grid-template-columns: 430px 1fr; gap:16px; padding:16px; }
+
     .panel { background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:14px; }
     .panel h2 { margin:0 0 10px; font-size:13px; opacity:.9; }
     label { display:block; font-size:12px; opacity:.9; margin:10px 0 6px; }
@@ -27,23 +28,23 @@
     button.primary { background:#6d5efc; border-color: rgba(255,255,255,.18); }
     button:disabled { opacity:.55; cursor:not-allowed; }
     .hint { font-size:12px; opacity:.75; line-height:1.4; margin-top:8px; }
-    .list { max-height: 260px; overflow:auto; border-top: 1px solid rgba(255,255,255,.08); margin-top: 12px; padding-top: 10px; }
+    .list { max-height: 240px; overflow:auto; border-top: 1px solid rgba(255,255,255,.08); margin-top: 12px; padding-top: 10px; }
     .thumb { display:flex; gap:10px; align-items:center; padding:8px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
     .thumb img { width:44px; height:44px; object-fit:cover; border-radius:8px; border: 1px solid rgba(255,255,255,.10); }
     .thumb div { font-size:12px; opacity:.9; overflow:hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     .stage { background: rgba(255,255,255,.02); border: 1px dashed rgba(255,255,255,.18); border-radius:14px; padding:14px; display:flex; gap:14px; align-items:flex-start; flex-wrap: wrap; }
-    canvas { width: 324px; height: 576px; border-radius: 12px; background:#111; border:1px solid rgba(255,255,255,.12); }
-    video { width: 324px; height: 576px; border-radius: 12px; background:#111; border:1px solid rgba(255,255,255,.12); }
+    canvas { width: 324px; height: auto; border-radius: 12px; background:#111; border:1px solid rgba(255,255,255,.12); }
+    video { width: 324px; height: auto; border-radius: 12px; background:#111; border:1px solid rgba(255,255,255,.12); }
     @media (max-width: 980px){
       main { grid-template-columns: 1fr; }
-      canvas, video { width: 270px; height: 480px; }
+      canvas, video { width: 270px; }
     }
   </style>
 </head>
 <body>
 <header>
-  <h1>Real Estate Reel Generator (1080×1920)</h1>
+  <h1>Property Reel / Video Generator</h1>
 </header>
 
 <main>
@@ -51,39 +52,109 @@
     <h2>1) Upload photos</h2>
     <input id="files" type="file" accept="image/*" multiple />
     <div class="hint">
-      Generates a single Reel video from all images. Add audio in Instagram/TikTok.
-      Output is usually WebM, sometimes MP4 depending on browser.
+      Generates a single video from all photos. Add audio in Instagram/TikTok.
+      Export is usually WebM, sometimes MP4 depending on browser.
     </div>
 
-    <h2 style="margin-top:16px;">2) Text + style</h2>
-
-    <label>Status (pill)</label>
-    <select id="status">
-      <option value="Түрээс">Түрээс</option>
-      <option value="Борлуулах">Борлуулах</option>
-      <option value="Зарсан">Зарсан</option>
-    </select>
-
-    <label>Bottom text block</label>
-    <textarea id="mainText" placeholder="🔑 БЗД-ийн урд “BayanzurkhApartment” хотхонд
-зохион байгуулалт сайтай 3 өрөө орон сууц худалдана.
-
-📞 8811-6639
-📐 66.8m²
-🛏️ 3 өрөө
-🏢 16/2 давхарт"></textarea>
+    <h2 style="margin-top:16px;">2) Output format</h2>
+    <div class="row">
+      <div>
+        <label>Format</label>
+        <select id="format">
+          <option value="reel" selected>Reel 9:16 (1080×1920)</option>
+          <option value="classic">Classic 4:3 (1080×810)</option>
+        </select>
+      </div>
+      <div>
+        <label>FPS</label>
+        <input id="fps" type="number" min="10" max="60" value="30" />
+      </div>
+    </div>
 
     <div class="row">
       <div>
-        <label>Status color</label>
-        <input id="statusColor" type="color" value="#2bd576" />
+        <label>Seconds per photo</label>
+        <input id="seconds" type="number" min="1" max="10" value="2" />
       </div>
       <div>
-        <label>Blur strength</label>
+        <label>Blur</label>
         <input id="blur" type="range" min="0" max="40" value="18" />
       </div>
     </div>
 
+    <h2 style="margin-top:16px;">3) Labels</h2>
+
+    <div class="row">
+      <div>
+        <label>Status (pill)</label>
+        <select id="status">
+          <option value="Түрээс" selected>Түрээс</option>
+          <option value="Борлуулах">Борлуулах</option>
+          <option value="Зарсан">Зарсан</option>
+        </select>
+      </div>
+      <div>
+        <label>Status color</label>
+        <input id="statusColor" type="color" value="#2bd576" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Phone</label>
+        <input id="phone" value="8081-6404" />
+      </div>
+      <div>
+        <label>Phone position</label>
+        <select id="phonePos">
+          <option value="heroRight" selected>Hero bottom-right (circled spot)</option>
+          <option value="bottomLeft">Bottom-left</option>
+          <option value="bottomRight">Bottom-right</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Price tag</label>
+        <input id="price" value="3+1 · 1,900,000₮" />
+      </div>
+      <div>
+        <label>Price position</label>
+        <select id="pricePos">
+          <option value="heroRight" selected>Hero (next to phone)</option>
+          <option value="underText">Under main text</option>
+        </select>
+      </div>
+    </div>
+
+    <h2 style="margin-top:16px;">4) Main text block</h2>
+    <textarea id="mainText" placeholder="Use **bold** and _italic_. Combine: **_both_**.
+
+Шунхир 245-р байранд 47.05м.кв байр
+- 11/16 давхарт
+- Баруун талруу харсан харуутай
+- Өмнө нь айл амьдарч байгаагүй шинэ байр
+- Удаан хугацаагаар түрээслүүлнэ.
+- Хагас тавилгатай, орох хүнд хөргөгч нэмэх суурилуулж өгч болно.">Шунхир 245-р байранд **47.05м.кв** байр
+- 11/16 давхарт
+- Баруун талруу харсан харуутай
+- Өмнө нь айл амьдарч байгаагүй _шинэ_ байр
+- Удаан хугацаагаар түрээслүүлнэ.
+- Хагас тавилгатай, орох хүнд хөргөгч нэмэх суурилуулж өгч болно.</textarea>
+
+    <div class="row">
+      <div>
+        <label>Text size</label>
+        <input id="textSize" type="range" min="26" max="52" value="38" />
+      </div>
+      <div>
+        <label>Text Y offset</label>
+        <input id="textOffset" type="range" min="-500" max="500" value="0" />
+      </div>
+    </div>
+
+    <h2 style="margin-top:16px;">5) Hero layout</h2>
     <div class="row">
       <div>
         <label>Hero position</label>
@@ -96,33 +167,9 @@
       <div>
         <label>Hero fit</label>
         <select id="fitMode">
-          <option value="cover" selected>Cover (best)</option>
+          <option value="cover" selected>Cover</option>
           <option value="contain">Contain</option>
         </select>
-      </div>
-    </div>
-
-    <h2 style="margin-top:16px;">3) Layout controls</h2>
-    <div class="row">
-      <div>
-        <label>Text Y offset (move up/down)</label>
-        <input id="textOffset" type="range" min="-400" max="400" value="0" />
-      </div>
-      <div>
-        <label>Text size</label>
-        <input id="textSize" type="range" min="30" max="52" value="40" />
-      </div>
-    </div>
-
-    <h2 style="margin-top:16px;">4) Video settings</h2>
-    <div class="row">
-      <div>
-        <label>Seconds per photo</label>
-        <input id="seconds" type="number" min="1" max="10" value="2" />
-      </div>
-      <div>
-        <label>FPS</label>
-        <input id="fps" type="number" min="10" max="60" value="30" />
       </div>
     </div>
 
@@ -130,8 +177,8 @@
       <div>
         <label>Hero motion</label>
         <select id="motion">
-          <option value="none">None (static)</option>
-          <option value="photo" selected>Photo only (recommended)</option>
+          <option value="none">None</option>
+          <option value="photo" selected>Photo only</option>
         </select>
       </div>
       <div>
@@ -140,10 +187,10 @@
       </div>
     </div>
 
-    <h2 style="margin-top:16px;">5) Export</h2>
+    <h2 style="margin-top:16px;">6) Export</h2>
     <div class="row">
-      <button id="btnPreview">Redraw preview</button>
-      <button id="btnVideo" class="primary">Generate Reel Video</button>
+      <button id="btnPreview">Redraw</button>
+      <button id="btnVideo" class="primary">Generate Video</button>
     </div>
     <div class="hint" id="hint"></div>
 
@@ -154,11 +201,11 @@
     <h2>Preview</h2>
     <div class="stage">
       <div>
-        <div class="hint" style="margin:0 0 8px;">Canvas (current slide)</div>
-        <canvas id="canvas" width="1080" height="1920"></canvas>
+        <div class="hint" style="margin:0 0 8px;">Canvas</div>
+        <canvas id="canvas"></canvas>
       </div>
       <div>
-        <div class="hint" style="margin:0 0 8px;">Generated video preview</div>
+        <div class="hint" style="margin:0 0 8px;">Video preview</div>
         <video id="vid" controls muted playsinline></video>
         <div class="hint">If IG refuses WebM, convert once in CapCut to MP4.</div>
       </div>
@@ -168,25 +215,31 @@
 
 <script>
 (() => {
-  const W = 1080, H = 1920;
-
+  // ===== DOM =====
   const filesEl = document.getElementById('files');
-  const listEl = document.getElementById('list');
-  const c = document.getElementById('canvas');
-  const ctx = c.getContext('2d');
+  const listEl  = document.getElementById('list');
+
+  const formatEl = document.getElementById('format');
+  const fpsEl = document.getElementById('fps');
+  const secondsEl = document.getElementById('seconds');
+  const blurEl = document.getElementById('blur');
 
   const statusEl = document.getElementById('status');
-  const mainTextEl = document.getElementById('mainText');
   const statusColorEl = document.getElementById('statusColor');
-  const blurEl = document.getElementById('blur');
+
+  const phoneEl = document.getElementById('phone');
+  const phonePosEl = document.getElementById('phonePos');
+
+  const priceEl = document.getElementById('price');
+  const pricePosEl = document.getElementById('pricePos');
+
+  const mainTextEl = document.getElementById('mainText');
+  const textSizeEl = document.getElementById('textSize');
+  const textOffsetEl = document.getElementById('textOffset');
+
   const heroPosEl = document.getElementById('heroPos');
   const fitModeEl = document.getElementById('fitMode');
 
-  const textOffsetEl = document.getElementById('textOffset');
-  const textSizeEl = document.getElementById('textSize');
-
-  const secondsEl = document.getElementById('seconds');
-  const fpsEl = document.getElementById('fps');
   const motionEl = document.getElementById('motion');
   const zoomEl = document.getElementById('zoom');
 
@@ -195,10 +248,26 @@
   const hintEl = document.getElementById('hint');
   const vid = document.getElementById('vid');
 
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+
   let slides = [];
   let currentIndex = 0;
 
+  // ===== Helpers =====
   function hint(msg){ hintEl.textContent = msg || ""; }
+
+  function getSize(){
+    const mode = formatEl.value;
+    if(mode === 'classic') return { W: 1080, H: 810 };     // 4:3
+    return { W: 1080, H: 1920 };                           // 9:16
+  }
+
+  function applyCanvasSize(){
+    const {W,H} = getSize();
+    canvas.width = W;
+    canvas.height = H;
+  }
 
   function fitRect(imgW, imgH, boxW, boxH, mode){
     const imgAR = imgW / imgH;
@@ -238,145 +307,117 @@
     ctx.shadowOffsetY = 0;
   }
 
-  function drawMultiline(text, x, y, maxWidth, lineHeight){
-    const lines = (text || "").split(/\n/);
-    for(const line of lines){
-      const words = line.split(/\s+/);
-      let cur = "";
+  // ===== Simple markup: **bold**, _italic_, **_both_**
+  function parseMarkupToRuns(line){
+    // Returns [{text, bold, italic}, ...]
+    const runs = [];
+    let i = 0;
+    let bold = false, italic = false;
+
+    function startsWithAt(pos, s){ return line.slice(pos, pos+s.length) === s; }
+
+    while(i < line.length){
+      if(startsWithAt(i, '**_')) { bold = !bold; italic = !italic; i += 3; continue; }
+      if(startsWithAt(i, '_**')) { bold = !bold; italic = !italic; i += 3; continue; }
+
+      if(startsWithAt(i, '**')) { bold = !bold; i += 2; continue; }
+      if(startsWithAt(i, '_'))  { italic = !italic; i += 1; continue; }
+
+      // collect text until next token
+      let j = i;
+      while(j < line.length){
+        if(startsWithAt(j, '**_') || startsWithAt(j, '_**') || startsWithAt(j, '**') || startsWithAt(j, '_')) break;
+        j++;
+      }
+      const chunk = line.slice(i, j);
+      if(chunk) runs.push({ text: chunk, bold, italic });
+      i = j;
+    }
+    return runs;
+  }
+
+  function setFont(sizePx, bold, italic){
+    const weight = bold ? 800 : 600;
+    const style = italic ? 'italic' : 'normal';
+    ctx.font = `${style} ${weight} ${sizePx}px system-ui, -apple-system, Segoe UI, Roboto, sans-serif`;
+  }
+
+  function measureRuns(runs, sizePx){
+    let w = 0;
+    for(const r of runs){
+      setFont(sizePx, r.bold, r.italic);
+      w += ctx.measureText(r.text).width;
+    }
+    return w;
+  }
+
+  function drawRuns(runs, x, y, sizePx){
+    let cursor = x;
+    for(const r of runs){
+      setFont(sizePx, r.bold, r.italic);
+      ctx.fillText(r.text, cursor, y);
+      cursor += ctx.measureText(r.text).width;
+    }
+  }
+
+  function wrapMarkupText(text, maxWidth, sizePx){
+    // Returns array of lines, each line is runs[]
+    // We do basic wrapping by words, but keep markup by parsing each line chunk.
+    const rawLines = (text || "").split('\n');
+    const out = [];
+
+    for(const raw of rawLines){
+      if(raw.trim() === ""){
+        out.push([{text:"", bold:false, italic:false}]);
+        continue;
+      }
+
+      // We'll tokenize by spaces but preserve markup within words.
+      const words = raw.split(/\s+/);
+      let curText = "";
+
+      function pushCur(){
+        if(curText === "") return;
+        out.push(parseMarkupToRuns(curText));
+        curText = "";
+      }
+
       for(const w of words){
-        const test = cur ? cur + " " + w : w;
-        if(ctx.measureText(test).width > maxWidth && cur){
-          ctx.fillText(cur, x, y);
-          y += lineHeight;
-          cur = w;
+        const test = curText ? (curText + " " + w) : w;
+        const runs = parseMarkupToRuns(test);
+        const width = measureRuns(runs, sizePx);
+        if(width > maxWidth && curText){
+          // push current line
+          pushCur();
+          curText = w;
         } else {
-          cur = test;
+          curText = test;
         }
       }
-      if(cur){
-        ctx.fillText(cur, x, y);
-        y += lineHeight;
-      } else {
-        y += lineHeight;
-      }
+      pushCur();
     }
-    return y;
+    return out;
   }
 
-  function getHeroY(heroH){
+  function getHeroY(H, heroH){
     const mode = heroPosEl.value;
-    if(mode === "top") return 110;
-    if(mode === "center") return Math.round(H/2 - heroH/2 - 80);
-    return 170;
+    if(mode === "top") return Math.round(H * 0.06);
+    if(mode === "center") return Math.round(H/2 - heroH/2 - H*0.06);
+    return Math.round(H * 0.10);
   }
 
-  function drawSlideBase(img){
-    ctx.clearRect(0,0,W,H);
-    const blurPx = Number(blurEl.value || 18);
-
-    ctx.save();
-    ctx.filter = `blur(${blurPx}px)`;
-    const bgFit = fitRect(img.naturalWidth, img.naturalHeight, W, H, 'cover');
-    ctx.drawImage(img, bgFit.x, bgFit.y, bgFit.w, bgFit.h);
-    ctx.restore();
-
-    ctx.fillStyle = 'rgba(0,0,0,0.22)';
-    ctx.fillRect(0,0,W,H);
-  }
-
-  // MAIN RENDER: hero moves (clipped), pill pinned across hero bottom edge, text block movable by slider
-  function drawSlide(img, t){
-    drawSlideBase(img);
-
-    const heroW = W;
-    const heroH = Math.round(W * 9 / 16);
-    const heroX = 0;
-    const heroY = getHeroY(heroH);
-
-    const baseFit = fitRect(img.naturalWidth, img.naturalHeight, heroW, heroH, fitModeEl.value || 'cover');
-
-    const motion = motionEl.value;
-    const strength = Number(zoomEl.value || 4) / 100;
-    const useMotion = (motion === 'photo');
-
-    const z = useMotion ? (1 + strength * t) : 1;
-    const panX = useMotion ? ((t - 0.5) * 26) : 0;
-    const panY = useMotion ? ((0.5 - t) * 10) : 0;
-
-    const drawW = baseFit.w * z;
-    const drawH = baseFit.h * z;
-
-    const dx = heroX + baseFit.x - (drawW - baseFit.w)/2 + panX;
-    const dy = heroY + baseFit.y - (drawH - baseFit.h)/2 + panY;
-
-    // ✅ CLIP hero so zoom doesn't create weird borders
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(heroX, heroY, heroW, heroH);
-    ctx.clip();
-    ctx.filter = 'none';
-    ctx.drawImage(img, dx, dy, drawW, drawH);
-    ctx.restore();
-
-    // Hero fade edges
-    const heroFade = ctx.createLinearGradient(0, heroY, 0, heroY + heroH);
-    heroFade.addColorStop(0.00, 'rgba(0,0,0,0.18)');
-    heroFade.addColorStop(0.15, 'rgba(0,0,0,0.00)');
-    heroFade.addColorStop(0.85, 'rgba(0,0,0,0.00)');
-    heroFade.addColorStop(1.00, 'rgba(0,0,0,0.18)');
-    ctx.fillStyle = heroFade;
-    ctx.fillRect(heroX, heroY, heroW, heroH);
-
-    // Bottom panel gradient
-    const panelTop = heroY + heroH + 40;
-    const padX = 70;
-
-    const panelGrad = ctx.createLinearGradient(0, panelTop - 120, 0, H);
-    panelGrad.addColorStop(0, 'rgba(0,0,0,0.00)');
-    panelGrad.addColorStop(1, 'rgba(0,0,0,0.62)');
-    ctx.fillStyle = panelGrad;
-    ctx.fillRect(0, panelTop - 120, W, H - (panelTop - 120));
-
-    // PILL pinned (half in/half out)
-    const status = (statusEl.value || "Түрээс").trim();
-    const statusColor = statusColorEl.value || "#2bd576";
-
-    ctx.font = '800 40px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
-    const pillTextW = ctx.measureText(status).width;
-    const pillPadX = 22;
-    const pillH = 70;
-    const pillW = Math.ceil(pillTextW + pillPadX*2);
-
-    const pillX = padX;
-    const pillY = Math.round(heroY + heroH - pillH/2);
-
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    drawRoundedRect(ctx, pillX+6, pillY+10, pillW, pillH, 999);
-    ctx.fill();
-
-    ctx.fillStyle = statusColor;
-    drawRoundedRect(ctx, pillX, pillY, pillW, pillH, 999);
-    ctx.fill();
-
-    ctx.fillStyle = 'rgba(0,0,0,0.72)';
-    ctx.textBaseline = 'middle';
-    ctx.textAlign = 'left';
-    ctx.fillText(status, pillX + pillPadX, pillY + pillH/2);
-
-    // ✅ TEXT BLOCK with Y offset
-    const text = (mainTextEl.value || "").trim();
-    const textSize = Number(textSizeEl.value || 40);
-    const offsetY = Number(textOffsetEl.value || 0);
-
-    // Start position: below pill OR below panel top, then apply offset
-    let y = Math.max(panelTop + 20, pillY + pillH + 34) + offsetY;
-
-    textShadow();
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    ctx.font = `700 ${textSize}px system-ui, -apple-system, Segoe UI, Roboto, sans-serif`;
-    drawMultiline(text, padX, y, W - padX*2, Math.round(textSize * 1.35));
-    clearShadow();
+  function pickRecorderMime(){
+    const candidates = [
+      'video/mp4;codecs=h264',
+      'video/mp4',
+      'video/webm;codecs=vp9',
+      'video/webm;codecs=vp8',
+      'video/webm'
+    ];
+    for(const m of candidates){
+      if(window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m;
+    }
+    return '';
   }
 
   async function fileToImage(file){
@@ -408,19 +449,213 @@
     });
   }
 
+  // ===== Render one frame =====
+  function drawFrame(img, t){
+    const {W,H} = getSize();
+    applyCanvasSize();
+
+    // Background blur cover
+    const blurPx = Number(blurEl.value || 18);
+    ctx.save();
+    ctx.filter = `blur(${blurPx}px)`;
+    const bgFit = fitRect(img.naturalWidth, img.naturalHeight, W, H, 'cover');
+    ctx.drawImage(img, bgFit.x, bgFit.y, bgFit.w, bgFit.h);
+    ctx.restore();
+
+    // Contrast overlay
+    ctx.fillStyle = 'rgba(0,0,0,0.22)';
+    ctx.fillRect(0,0,W,H);
+
+    // HERO size (16:9 full width for reel; for 4:3 still full width but shorter canvas)
+    const heroW = W;
+    const heroH = Math.round(W * 9 / 16);
+    const heroX = 0;
+    const heroY = getHeroY(H, heroH);
+
+    const baseFit = fitRect(img.naturalWidth, img.naturalHeight, heroW, heroH, fitModeEl.value || 'cover');
+
+    // Photo-only motion
+    const useMotion = (motionEl.value === 'photo');
+    const strength = Number(zoomEl.value || 4) / 100;
+    const z = useMotion ? (1 + strength * t) : 1;
+    const panX = useMotion ? ((t - 0.5) * 26) : 0;
+    const panY = useMotion ? ((0.5 - t) * 10) : 0;
+
+    const drawW = baseFit.w * z;
+    const drawH = baseFit.h * z;
+    const dx = heroX + baseFit.x - (drawW - baseFit.w)/2 + panX;
+    const dy = heroY + baseFit.y - (drawH - baseFit.h)/2 + panY;
+
+    // ✅ clip hero to prevent zoom borders
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(heroX, heroY, heroW, heroH);
+    ctx.clip();
+    ctx.filter = 'none';
+    ctx.drawImage(img, dx, dy, drawW, drawH);
+    ctx.restore();
+
+    // hero fade
+    const heroFade = ctx.createLinearGradient(0, heroY, 0, heroY + heroH);
+    heroFade.addColorStop(0.00, 'rgba(0,0,0,0.18)');
+    heroFade.addColorStop(0.15, 'rgba(0,0,0,0.00)');
+    heroFade.addColorStop(0.85, 'rgba(0,0,0,0.00)');
+    heroFade.addColorStop(1.00, 'rgba(0,0,0,0.18)');
+    ctx.fillStyle = heroFade;
+    ctx.fillRect(heroX, heroY, heroW, heroH);
+
+    // panel gradient below hero
+    const panelTop = heroY + heroH + Math.round(H * 0.02);
+    const padX = Math.round(W * 0.06);
+
+    const panelGrad = ctx.createLinearGradient(0, panelTop - 120, 0, H);
+    panelGrad.addColorStop(0, 'rgba(0,0,0,0.00)');
+    panelGrad.addColorStop(1, 'rgba(0,0,0,0.62)');
+    ctx.fillStyle = panelGrad;
+    ctx.fillRect(0, panelTop - 120, W, H - (panelTop - 120));
+
+    // Status pill pinned at hero bottom edge
+    const status = (statusEl.value || "Түрээс").trim();
+    const statusColor = statusColorEl.value || "#2bd576";
+    const pillH = Math.round(H * 0.04);      // scales with format
+    const pillFont = Math.round(pillH * 0.55);
+    const pillPadX = Math.round(pillH * 0.35);
+
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.font = `800 ${pillFont}px system-ui, -apple-system, Segoe UI, Roboto, sans-serif`;
+    const pillTextW = ctx.measureText(status).width;
+    const pillW = Math.ceil(pillTextW + pillPadX*2);
+
+    const pillX = padX;
+    const pillY = Math.round(heroY + heroH - pillH/2);
+
+    // shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    drawRoundedRect(ctx, pillX+6, pillY+10, pillW, pillH, 999);
+    ctx.fill();
+    // pill
+    ctx.fillStyle = statusColor;
+    drawRoundedRect(ctx, pillX, pillY, pillW, pillH, 999);
+    ctx.fill();
+    // pill text
+    ctx.fillStyle = 'rgba(0,0,0,0.72)';
+    ctx.fillText(status, pillX + pillPadX, pillY + pillH/2);
+
+    // ===== Phone + Price on hero (circled spot) =====
+    const phone = (phoneEl.value || "").trim();
+    const price = (priceEl.value || "").trim();
+
+    // Decide where phone/price go
+    const rightX = W - padX;
+    const onHeroY = heroY + heroH - Math.round(pillH * 0.75);
+
+    // small dark chip style
+    function drawChip(text, xRight, yMid, fontPx){
+      if(!text) return;
+      ctx.font = `800 ${fontPx}px system-ui, -apple-system, Segoe UI, Roboto, sans-serif`;
+      const w = ctx.measureText(text).width;
+      const pad = Math.round(fontPx * 0.65);
+      const h = Math.round(fontPx * 1.6);
+      const x = Math.round(xRight - (w + pad*2));
+      const y = Math.round(yMid - h/2);
+
+      ctx.fillStyle = 'rgba(0,0,0,0.40)';
+      drawRoundedRect(ctx, x+5, y+8, w + pad*2, h, 999);
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(255,255,255,0.88)';
+      drawRoundedRect(ctx, x, y, w + pad*2, h, 999);
+      // outline only? keep subtle
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      drawRoundedRect(ctx, x, y, w + pad*2, h, 999);
+      ctx.fill();
+
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, x + pad, yMid);
+      return y - 10; // next chip y
+    }
+
+    const chipFont = Math.round(H * 0.028);
+
+    // phone position
+    if(phonePosEl.value === 'heroRight'){
+      let yChip = onHeroY;
+      if(pricePosEl.value === 'heroRight'){
+        yChip = drawChip(price, rightX, yChip, chipFont) ?? yChip;
+      }
+      drawChip("📞 " + phone, rightX, yChip, chipFont);
+    }
+
+    // price under text option later
+    // ===== Main text block with bold/italic markup =====
+    const textSize = Number(textSizeEl.value || 38);
+    const lineHeight = Math.round(textSize * 1.35);
+    const maxW = W - padX*2;
+
+    // start position
+    let y = Math.max(panelTop + Math.round(H*0.02), pillY + pillH + Math.round(H*0.02));
+    y += Number(textOffsetEl.value || 0);
+
+    textShadow();
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'left';
+
+    const wrapped = wrapMarkupText(mainTextEl.value || "", maxW, textSize);
+
+    for(const runs of wrapped){
+      // blank line
+      if(runs.length === 1 && runs[0].text === ""){
+        y += lineHeight;
+        continue;
+      }
+      // draw the runs
+      drawRuns(runs, padX, y, textSize);
+      y += lineHeight;
+    }
+    clearShadow();
+
+    // bottom-left / bottom-right phone options
+    const footerY = H - Math.round(H*0.06);
+    ctx.shadowColor = 'transparent';
+    if(phone && phonePosEl.value !== 'heroRight'){
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.font = `800 ${Math.round(H*0.032)}px system-ui, -apple-system, Segoe UI, Roboto, sans-serif`;
+      if(phonePosEl.value === 'bottomLeft'){
+        ctx.textAlign = 'left';
+        ctx.fillText("📞 " + phone, padX, footerY);
+      } else if(phonePosEl.value === 'bottomRight'){
+        ctx.textAlign = 'right';
+        ctx.fillText("📞 " + phone, W - padX, footerY);
+      }
+    }
+
+    if(price && pricePosEl.value === 'underText'){
+      ctx.fillStyle = 'rgba(255,255,255,0.88)';
+      ctx.font = `900 ${Math.round(H*0.034)}px system-ui, -apple-system, Segoe UI, Roboto, sans-serif`;
+      ctx.textAlign = 'left';
+      ctx.fillText(price, padX, Math.min(y + Math.round(H*0.02), footerY - Math.round(H*0.06)));
+    }
+  }
+
   function redraw(){
-    if(slides.length) drawSlide(slides[currentIndex].img, 0);
-    else {
+    if(!slides.length){
+      applyCanvasSize();
+      const {W,H} = getSize();
       ctx.clearRect(0,0,W,H);
       ctx.fillStyle = '#11131a';
       ctx.fillRect(0,0,W,H);
       ctx.fillStyle = 'rgba(255,255,255,0.7)';
-      ctx.font = '800 56px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
-      ctx.fillText('Upload listing photos', 90, 220);
-      ctx.font = '500 36px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
+      ctx.font = '800 42px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
+      ctx.fillText('Upload listing photos', 60, 120);
+      ctx.font = '600 26px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
       ctx.fillStyle = 'rgba(255,255,255,0.55)';
-      ctx.fillText('Use Text Y offset to move text.', 90, 290);
+      ctx.fillText('Then generate video. Use **bold** and _italic_.', 60, 165);
+      return;
     }
+    drawFrame(slides[currentIndex].img, 0);
   }
 
   async function downloadBlob(blob, filename){
@@ -434,51 +669,38 @@
     setTimeout(() => URL.revokeObjectURL(url), 2000);
   }
 
-  function pickRecorderMime(){
-    const candidates = [
-      'video/mp4;codecs=h264',
-      'video/mp4',
-      'video/webm;codecs=vp9',
-      'video/webm;codecs=vp8',
-      'video/webm'
-    ];
-    for(const m of candidates){
-      if(window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m;
-    }
-    return '';
-  }
-
   async function exportVideo(){
     if(!slides.length){
       hint("No photos. Upload first.");
       return;
     }
 
-    const seconds = Math.max(1, Math.min(10, Number(secondsEl.value || 2)));
     const fps = Math.max(10, Math.min(60, Number(fpsEl.value || 30)));
-    const framesPerSlide = Math.max(1, Math.round(seconds * fps));
-
-    btnVideo.disabled = true;
-    btnPreview.disabled = true;
+    const seconds = Math.max(1, Math.min(10, Number(secondsEl.value || 2)));
+    const framesPerSlide = Math.max(1, Math.round(fps * seconds));
 
     const mime = pickRecorderMime();
     if(!mime){
       hint("MediaRecorder not supported. Use Chrome/Edge desktop.");
-      btnVideo.disabled = false;
-      btnPreview.disabled = false;
       return;
     }
 
+    btnVideo.disabled = true;
+    btnPreview.disabled = true;
+
     hint(`Recording... (${mime})`);
 
-    const stream = c.captureStream(fps);
+    // Make sure canvas size matches selected format
+    applyCanvasSize();
+
+    const stream = canvas.captureStream(fps);
     const chunks = [];
     let rec;
 
     try{
       rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8_000_000 });
     } catch(e){
-      hint("MediaRecorder failed to start. Try Chrome/Edge.");
+      hint("Recorder failed. Try Chrome/Edge.");
       btnVideo.disabled = false;
       btnPreview.disabled = false;
       return;
@@ -489,11 +711,11 @@
 
     rec.start(200);
 
-    for(let i=0; i<slides.length; i++){
-      hint(`Recording slide ${i+1}/${slides.length}...`);
+    for(let i=0;i<slides.length;i++){
+      hint(`Slide ${i+1}/${slides.length}...`);
       for(let f=0; f<framesPerSlide; f++){
         const t = f / framesPerSlide;
-        drawSlide(slides[i].img, t);
+        drawFrame(slides[i].img, (motionEl.value === 'photo') ? t : 0);
         await new Promise(r => setTimeout(r, 1000 / fps));
       }
     }
@@ -504,7 +726,8 @@
     const type = mime.split(';')[0] || 'video/webm';
     const blob = new Blob(chunks, { type });
     const ext = mime.includes('mp4') ? 'mp4' : 'webm';
-    const filename = `reel_${W}x${H}.${ext}`;
+    const {W,H} = getSize();
+    const filename = `listing_${W}x${H}.${ext}`;
 
     const url = URL.createObjectURL(blob);
     vid.src = url;
@@ -516,7 +739,7 @@
     btnPreview.disabled = false;
   }
 
-  // Events
+  // ===== Events =====
   filesEl.addEventListener('change', async () => {
     const files = [...(filesEl.files || [])];
     slides = [];
@@ -544,18 +767,29 @@
     btnPreview.disabled = false;
   });
 
+  // Click thumbnails to preview
+  function bindThumbClicks(){
+    // already in renderList row.onclick
+  }
+
   btnPreview.addEventListener('click', redraw);
   btnVideo.addEventListener('click', exportVideo);
 
   [
-    statusEl, mainTextEl, statusColorEl, blurEl, heroPosEl, fitModeEl,
-    textOffsetEl, textSizeEl,
-    secondsEl, fpsEl, motionEl, zoomEl
+    formatEl, fpsEl, secondsEl, blurEl,
+    statusEl, statusColorEl,
+    phoneEl, phonePosEl,
+    priceEl, pricePosEl,
+    mainTextEl, textSizeEl, textOffsetEl,
+    heroPosEl, fitModeEl,
+    motionEl, zoomEl
   ].forEach(el => {
     el.addEventListener('input', redraw);
     el.addEventListener('change', redraw);
   });
 
+  // Initial
+  applyCanvasSize();
   redraw();
 })();
 </script>
