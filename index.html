@@ -3,62 +3,63 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Property Video Generator</title>
+  <title>Real Estate Reel / 4:3 Generator</title>
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin:0; background:#0b0d12; color:#e7e9ee; }
-    header { padding: 16px 18px; border-bottom: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.03); position: sticky; top: 0; z-index: 5; }
-    h1 { margin:0; font-size:16px; font-weight:800; }
-    main { display:grid; grid-template-columns: 480px 1fr; gap:16px; padding:16px; }
-
-    .panel { background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:14px; }
-    .panel h2 { margin:0 0 10px; font-size:13px; opacity:.9; }
-    label { display:block; font-size:12px; opacity:.9; margin:10px 0 6px; }
-    input, textarea, select, button {
-      width:100%; box-sizing:border-box;
-      background: rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.12);
-      color:#e7e9ee;
-      border-radius:10px;
-      padding:10px;
-      outline:none;
+    :root{
+      --bg:#0b0d12;
+      --panel:rgba(255,255,255,.04);
+      --border:rgba(255,255,255,.08);
+      --text:#e7e9ee;
     }
-    textarea { min-height: 110px; resize: vertical; line-height: 1.35; }
-    .row { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
-    button { cursor:pointer; font-weight:800; }
-    button.primary { background:#6d5efc; border-color: rgba(255,255,255,.18); }
-    button:disabled { opacity:.55; cursor:not-allowed; }
-    .hint { font-size:12px; opacity:.75; line-height:1.4; margin-top:8px; }
-    .divider { height:1px; background: rgba(255,255,255,.08); margin:12px 0; }
-    .hide { display:none !important; }
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text);}
+    header{padding:16px 18px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.03);position:sticky;top:0;z-index:5}
+    h1{margin:0;font-size:16px;font-weight:900}
+    main{display:grid;grid-template-columns:480px 1fr;gap:16px;padding:16px}
+    .panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:14px}
+    .panel h2{margin:0 0 10px;font-size:13px;opacity:.9}
+    label{display:block;font-size:12px;opacity:.9;margin:10px 0 6px}
+    input,textarea,select,button{
+      width:100%;box-sizing:border-box;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.12);
+      color:var(--text);border-radius:10px;padding:10px;outline:none
+    }
+    textarea{min-height:110px;resize:vertical;line-height:1.35}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    button{cursor:pointer;font-weight:900}
+    button.primary{background:#6d5efc;border-color:rgba(255,255,255,.18)}
+    button:disabled{opacity:.55;cursor:not-allowed}
+    .hint{font-size:12px;opacity:.75;line-height:1.4;margin-top:8px}
+    .divider{height:1px;background:var(--border);margin:12px 0}
+    .hide{display:none!important}
 
-    .list { max-height: 220px; overflow:auto; border-top: 1px solid rgba(255,255,255,.08); margin-top: 12px; padding-top: 10px; }
-    .thumb { display:flex; gap:10px; align-items:center; padding:8px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
-    .thumb img { width:44px; height:44px; object-fit:cover; border-radius:8px; border: 1px solid rgba(255,255,255,.10); }
-    .thumb div { font-size:12px; opacity:.9; overflow:hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .list{max-height:220px;overflow:auto;border-top:1px solid var(--border);margin-top:12px;padding-top:10px}
+    .thumb{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+    .thumb img{width:44px;height:44px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,.10)}
+    .thumb div{font-size:12px;opacity:.9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-    .stage { background: rgba(255,255,255,.02); border: 1px dashed rgba(255,255,255,.18); border-radius:14px; padding:14px; display:flex; gap:14px; align-items:flex-start; flex-wrap: wrap; }
-    canvas { width: 360px; height: auto; border-radius: 12px; background:#111; border:1px solid rgba(255,255,255,.12); }
-    video { width: 360px; height: auto; border-radius: 12px; background:#111; border:1px solid rgba(255,255,255,.12); }
-
-    @media (max-width: 980px){
-      main { grid-template-columns: 1fr; }
-      canvas, video { width: 280px; }
+    .stage{background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.18);border-radius:14px;padding:14px;display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+    canvas{width:360px;height:auto;border-radius:12px;background:#111;border:1px solid rgba(255,255,255,.12)}
+    video{width:360px;height:auto;border-radius:12px;background:#111;border:1px solid rgba(255,255,255,.12)}
+    @media (max-width:980px){
+      main{grid-template-columns:1fr}
+      canvas,video{width:280px}
     }
   </style>
 </head>
 <body>
-<header><h1>Property Video Generator (Reel + 4:3)</h1></header>
+<header><h1>Listing Video Generator (Reel 9:16 + 4:3)</h1></header>
 
 <main>
   <section class="panel">
     <h2>1) Upload photos</h2>
     <input id="files" type="file" accept="image/*" multiple />
-    <div class="hint">Exports a single video from all photos. Add audio later in IG/TikTok.</div>
+    <div class="hint">Exports one video. Add music later in IG/TikTok.</div>
 
-    <h2 style="margin-top:16px;">2) Format</h2>
+    <h2 style="margin-top:16px;">2) Output</h2>
     <div class="row">
       <div>
-        <label>Output</label>
+        <label>Format</label>
         <select id="format">
           <option value="reel" selected>Reel 9:16 (1080×1920)</option>
           <option value="classic">Classic 4:3 (1080×810)</option>
@@ -123,7 +124,7 @@
       </div>
       <div>
         <label>Text Y offset</label>
-        <input id="textOffset" type="range" min="-300" max="300" value="0" />
+        <input id="textOffset" type="range" min="-400" max="400" value="0" />
       </div>
     </div>
 
@@ -149,76 +150,104 @@
 
     <div class="divider"></div>
 
+    <!-- REEL CONTROLS -->
     <div id="reelControls">
-      <h2>4) Reel positions</h2>
-      <div class="hint">Reel: pill top-left, phone top-right, price near bottom-right of photo.</div>
+      <h2>4) Reel options</h2>
+      <div class="hint">Reel uses a TRUE 16:9 photo on a 9:16 canvas, text below.</div>
+
       <div class="row">
         <div>
-          <label>Reel pill</label>
+          <label>Pill</label>
           <select id="reelPillPos">
             <option value="tl" selected>Top-left</option>
             <option value="tr">Top-right</option>
           </select>
         </div>
         <div>
-          <label>Reel phone</label>
+          <label>Phone</label>
           <select id="reelPhonePos">
             <option value="tr" selected>Top-right</option>
             <option value="tl">Top-left</option>
           </select>
         </div>
       </div>
+
       <div class="row">
         <div>
-          <label>Reel price</label>
+          <label>Price</label>
           <select id="reelPricePos">
             <option value="br" selected>Bottom-right (on photo)</option>
             <option value="bl">Bottom-left (on photo)</option>
           </select>
         </div>
         <div>
-          <label>Reel text style</label>
+          <label>Text box style</label>
           <select id="reelTextStyle">
-            <option value="below" selected>Text box below photo</option>
-            <option value="overlay">Text overlay on photo bottom</option>
+            <option value="below" selected>Below photo</option>
+            <option value="overlay">Overlay on photo bottom</option>
           </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Card radius</label>
+          <input id="reelRadius" type="range" min="10" max="80" value="46" />
+        </div>
+        <div>
+          <label>Card padding</label>
+          <input id="reelPad" type="range" min="20" max="80" value="42" />
         </div>
       </div>
     </div>
 
+    <!-- CLASSIC CONTROLS -->
     <div id="classicControls" class="hide">
-      <h2>4) 4:3 positions</h2>
-      <div class="hint">4:3: bottom bar. Text left, phone top-right, price bottom-right (like your example).</div>
+      <h2>4) 4:3 options</h2>
+      <div class="hint">4:3 uses photo on top + bottom bar. Text on left, phone top-right, price bottom-right.</div>
+
       <div class="row">
         <div>
-          <label>4:3 pill</label>
+          <label>Pill (bar)</label>
           <select id="cPillPos">
-            <option value="tl" selected>Bar top-left</option>
-            <option value="tr">Bar top-right</option>
+            <option value="tl" selected>Top-left</option>
+            <option value="tr">Top-right</option>
           </select>
         </div>
         <div>
-          <label>4:3 phone</label>
+          <label>Phone (bar)</label>
           <select id="cPhonePos">
-            <option value="tr" selected>Bar top-right</option>
-            <option value="tl">Bar top-left</option>
+            <option value="tr" selected>Top-right</option>
+            <option value="tl">Top-left</option>
           </select>
         </div>
       </div>
+
       <div class="row">
         <div>
-          <label>4:3 price</label>
+          <label>Price (bar)</label>
           <select id="cPricePos">
-            <option value="br" selected>Bar bottom-right</option>
-            <option value="bl">Bar bottom-left</option>
+            <option value="br" selected>Bottom-right</option>
+            <option value="bl">Bottom-left</option>
           </select>
         </div>
         <div>
-          <label>4:3 text</label>
+          <label>Text position</label>
           <select id="cTextPos">
-            <option value="left" selected>Left (default)</option>
-            <option value="center">Center</option>
+            <option value="left" selected>Left</option>
+            <option value="center">Center-ish</option>
           </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Bar height</label>
+          <input id="barH" type="range" min="140" max="320" value="220" />
+        </div>
+        <div>
+          <label>Photo radius</label>
+          <input id="classicPhotoR" type="range" min="10" max="40" value="22" />
         </div>
       </div>
     </div>
@@ -254,6 +283,7 @@
 (() => {
   const $ = (id) => document.getElementById(id);
 
+  // DOM
   const filesEl = $('files');
   const listEl  = $('list');
   const formatEl = $('format');
@@ -282,11 +312,15 @@
   const reelPhonePosEl = $('reelPhonePos');
   const reelPricePosEl = $('reelPricePos');
   const reelTextStyleEl = $('reelTextStyle');
+  const reelRadiusEl = $('reelRadius');
+  const reelPadEl = $('reelPad');
 
   const cPillPosEl = $('cPillPos');
   const cPhonePosEl = $('cPhonePos');
   const cPricePosEl = $('cPricePos');
   const cTextPosEl = $('cTextPos');
+  const barHEl = $('barH');
+  const classicPhotoREl = $('classicPhotoR');
 
   const btnPreview = $('btnPreview');
   const btnVideo = $('btnVideo');
@@ -355,7 +389,7 @@
     ctx.shadowOffsetY = 0;
   }
 
-  // Markup
+  // Markup parsing: **bold**, _italic_, **_both_**
   function parseMarkupToRuns(line){
     const runs = [];
     let i = 0;
@@ -426,9 +460,9 @@
     return out;
   }
 
-  // Chip
+  // Chips
   function drawChip(text, x, y, anchor, bg, fg, fontPx, padX, padY, radius){
-    if(!text) return { w:0, h:0 };
+    if(!text) return;
     ctx.font = `900 ${fontPx}px system-ui, -apple-system, Segoe UI, Roboto, sans-serif`;
     const tw = ctx.measureText(text).width;
     const w = Math.ceil(tw + padX*2);
@@ -452,11 +486,8 @@
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
     ctx.fillText(text, rx + padX, ry + h/2);
-
-    return { w, h, x: rx, y: ry };
   }
 
-  // BG
   function drawBlurBG(img, W, H){
     const blurPx = Number(blurEl.value || 18);
     ctx.save();
@@ -468,26 +499,28 @@
     ctx.fillRect(0,0,W,H);
   }
 
-  // ===== REEL (fixed mapping) =====
+  // ===== REEL 9:16 =====
   function drawReel916(img, t){
     const {W,H} = getSize(); // 1080x1920
     drawBlurBG(img, W, H);
 
-    // Card container
-    const cardPad = 42;
+    const cardPad = Number(reelPadEl.value || 42);
+    const radius = Number(reelRadiusEl.value || 46);
+
     const cardX = cardPad, cardY = cardPad;
     const cardW = W - cardPad*2, cardH = H - cardPad*2;
 
     ctx.fillStyle = 'rgba(255,255,255,0.10)';
-    drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 46);
+    drawRoundedRect(ctx, cardX, cardY, cardW, cardH, radius);
     ctx.fill();
 
-    // Photo area (top)
     const innerPad = 22;
     const photoX = cardX + innerPad;
     const photoY = cardY + innerPad;
     const photoW = cardW - innerPad*2;
-    const photoH = Math.round(cardH * 0.60);
+
+    // ✅ TRUE 16:9 based on width (NOT square)
+    const photoH = Math.round(photoW * 9 / 16);
 
     // Photo cover + motion
     const baseFit = fitRect(img.naturalWidth, img.naturalHeight, photoW, photoH, 'cover');
@@ -504,49 +537,46 @@
     const dy = photoY + baseFit.y - (drawH - baseFit.h)/2 + panY;
 
     ctx.save();
-    drawRoundedRect(ctx, photoX, photoY, photoW, photoH, 34);
+    drawRoundedRect(ctx, photoX, photoY, photoW, photoH, Math.max(18, radius - 12));
     ctx.clip();
     ctx.filter = 'none';
     ctx.drawImage(img, dx, dy, drawW, drawH);
     ctx.restore();
 
-    // Chips positions (THIS is the part you said got swapped)
-    const status = (statusEl.value || "").trim();
-    const phone = (phoneEl.value || "").trim();
-    const price = (priceEl.value || "").trim();
-
+    // Chip anchors relative to photo
     const safe = 18;
-    const tlX = photoX + safe, tlY = photoY + safe;
-    const trX = photoX + photoW - safe, trY = photoY + safe;
-    const brX = photoX + photoW - safe, brY = photoY + photoH - safe;
-    const blX = photoX + safe, blY = photoY + photoH - safe;
+    const tl = {x: photoX + safe, y: photoY + safe, a:'tl'};
+    const tr = {x: photoX + photoW - safe, y: photoY + safe, a:'tr'};
+    const bl = {x: photoX + safe, y: photoY + photoH - safe, a:'bl'};
+    const br = {x: photoX + photoW - safe, y: photoY + photoH - safe, a:'br'};
 
-    const posXY = (pos) => {
-      if(pos === 'tl') return { x: tlX, y: tlY, a:'tl' };
-      if(pos === 'tr') return { x: trX, y: trY, a:'tr' };
-      if(pos === 'bl') return { x: blX, y: blY, a:'bl' };
-      return { x: brX, y: brY, a:'br' };
-    };
+    const pick = (pos) => (pos === 'tl' ? tl : pos === 'tr' ? tr : pos === 'bl' ? bl : br);
 
-    // Pill (top only by selector)
-    const p1 = posXY(reelPillPosEl.value);
-    drawChip(status, p1.x, p1.y, p1.a, statusColorEl.value || '#2bd576', 'rgba(0,0,0,0.72)', 40, 22, 14, 999);
+    const status = (statusEl.value || "").trim();
+    const phone  = (phoneEl.value || "").trim();
+    const price  = (priceEl.value || "").trim();
 
-    // Phone (top only by selector)
-    const p2 = posXY(reelPhonePosEl.value);
-    drawChip("📞 " + phone, p2.x, p2.y, p2.a, 'rgba(0,0,0,0.45)', 'rgba(255,255,255,0.92)', 38, 20, 14, 999);
+    // Pill (top)
+    const pillPos = pick(reelPillPosEl.value);
+    drawChip(status, pillPos.x, pillPos.y, pillPos.a, statusColorEl.value || '#2bd576', 'rgba(0,0,0,0.72)', 40, 22, 14, 999);
 
-    // Price (bottom only by selector, on photo)
-    const p3 = posXY(reelPricePosEl.value);
-    drawChip(price, p3.x, p3.y, p3.a, 'rgba(0,0,0,0.55)', 'rgba(255,255,255,0.92)', 40, 22, 14, 18);
+    // Phone (top)
+    const phonePos = pick(reelPhonePosEl.value);
+    drawChip("📞 " + phone, phonePos.x, phonePos.y, phonePos.a, 'rgba(0,0,0,0.45)', 'rgba(255,255,255,0.92)', 38, 20, 14, 999);
 
-    // Text area
+    // Price (bottom on photo)
+    const pricePos = pick(reelPricePosEl.value);
+    drawChip(price, pricePos.x, pricePos.y, pricePos.a, 'rgba(0,0,0,0.55)', 'rgba(255,255,255,0.92)', 40, 22, 14, 18);
+
+    // Text
     if(showTextEl.value === 'yes'){
+      const size = Number(textSizeEl.value || 30);
+
       if(reelTextStyleEl.value === 'below'){
         const boxX = photoX;
         const boxY = photoY + photoH + 18;
         const boxW = photoW;
-        const boxH = cardY + cardH - innerPad - boxY;
+        const boxH = (cardY + cardH - innerPad) - boxY;
 
         ctx.fillStyle = 'rgba(0,0,0,0.35)';
         drawRoundedRect(ctx, boxX, boxY, boxW, boxH, 28);
@@ -561,7 +591,6 @@
 
         const padX = 28;
         const maxW = boxW - padX*2;
-        const size = Number(textSizeEl.value || 30);
         const lines = wrapMarkupText(mainTextEl.value || "", maxW, size);
         const lineH = Math.round(size * 1.25);
 
@@ -580,13 +609,11 @@
         clearShadow();
       } else {
         // overlay on photo bottom
-        const boxW = photoW;
         const boxH = Math.round(photoH * 0.26);
-        const boxX = photoX;
-        const boxY = photoY + photoH - boxH;
+        const boxX = photoX, boxY = photoY + photoH - boxH, boxW = photoW;
 
         ctx.save();
-        drawRoundedRect(ctx, photoX, photoY, photoW, photoH, 34);
+        drawRoundedRect(ctx, photoX, photoY, photoW, photoH, Math.max(18, radius - 12));
         ctx.clip();
         const g = ctx.createLinearGradient(0, boxY, 0, boxY + boxH);
         g.addColorStop(0, 'rgba(0,0,0,0.00)');
@@ -597,7 +624,6 @@
 
         const padX = 26;
         const maxW = boxW - padX*2;
-        const size = Number(textSizeEl.value || 30);
         const lines = wrapMarkupText(mainTextEl.value || "", maxW, size);
         const lineH = Math.round(size * 1.22);
 
@@ -618,20 +644,23 @@
     }
   }
 
-  // ===== 4:3 (fixed mapping) =====
+  // ===== CLASSIC 4:3 =====
   function drawClassic43(img, t){
     const {W,H} = getSize(); // 1080x810
     drawBlurBG(img, W, H);
 
     const pad = 24;
-    const barH = Math.round(H * 0.28);
-    const photoH = H - barH - pad;
-    const photoX = pad, photoY = pad, photoW = W - pad*2;
+    const barH = Number(barHEl.value || 220);
+    const photoR = Number(classicPhotoREl.value || 22);
 
-    // Photo
+    const photoX = pad, photoY = pad, photoW = W - pad*2;
+    const photoH = H - barH - pad - 12;
+
+    // Photo cover + motion
     const baseFit = fitRect(img.naturalWidth, img.naturalHeight, photoW, photoH, 'cover');
     const useMotion = (motionEl.value === 'photo');
     const strength = Number(zoomEl.value || 4) / 100;
+
     const z = useMotion ? (1 + strength * t) : 1;
     const panX = useMotion ? ((t - 0.5) * 18) : 0;
     const panY = useMotion ? ((0.5 - t) * 8) : 0;
@@ -642,7 +671,7 @@
     const dy = photoY + baseFit.y - (drawH - baseFit.h)/2 + panY;
 
     ctx.save();
-    drawRoundedRect(ctx, photoX, photoY, photoW, photoH, 22);
+    drawRoundedRect(ctx, photoX, photoY, photoW, photoH, photoR);
     ctx.clip();
     ctx.filter = 'none';
     ctx.drawImage(img, dx, dy, drawW, drawH);
@@ -670,56 +699,50 @@
     const botY = barY + barH - 18;
 
     const status = (statusEl.value || "").trim();
-    const phone = (phoneEl.value || "").trim();
-    const price = (priceEl.value || "").trim();
-    const statusColor = statusColorEl.value || '#2bd576';
+    const phone  = (phoneEl.value || "").trim();
+    const price  = (priceEl.value || "").trim();
 
-    // pill: top-left or top-right of bar
-    const pillPos = cPillPosEl.value; // tl or tr
-    drawChip(
-      status,
-      pillPos === 'tr' ? rightX : leftX,
+    // Pill (bar top)
+    drawChip(status,
+      cPillPosEl.value === 'tr' ? rightX : leftX,
       topY,
-      pillPos,
-      statusColor,
+      cPillPosEl.value,
+      statusColorEl.value || '#2bd576',
       'rgba(0,0,0,0.75)',
       26, 18, 12, 999
     );
 
-    // phone: top-right by default
-    const phonePos = cPhonePosEl.value; // tl or tr
-    drawChip(
-      "📞 " + phone,
-      phonePos === 'tr' ? rightX : leftX,
+    // Phone (bar top-right default)
+    drawChip("📞 " + phone,
+      cPhonePosEl.value === 'tr' ? rightX : leftX,
       topY + 62,
-      phonePos,
+      cPhonePosEl.value,
       'rgba(0,0,0,0.45)',
       'rgba(255,255,255,0.92)',
       24, 16, 12, 999
     );
 
-    // price: bottom-right by default
-    const pricePos = cPricePosEl.value; // br or bl
-    drawChip(
-      price,
-      pricePos === 'br' ? rightX : leftX,
+    // Price (bar bottom-right default)
+    drawChip(price,
+      cPricePosEl.value === 'br' ? rightX : leftX,
       botY,
-      pricePos,
+      cPricePosEl.value,
       'rgba(0,0,0,0.55)',
       'rgba(255,255,255,0.92)',
       26, 18, 12, 18
     );
 
-    // text: left or center in bar
+    // Text (bar)
     if(showTextEl.value === 'yes'){
       const size = Number(textSizeEl.value || 28);
       const maxW = barW - 52;
       const lines = wrapMarkupText(mainTextEl.value || "", maxW, size);
       const lineH = Math.round(size * 1.22);
 
-      let y = barY + Math.round(barH * 0.55) + Number(textOffsetEl.value || 0);
       let x = leftX;
       if(cTextPosEl.value === 'center') x = barX + Math.round(barW * 0.25);
+
+      let y = barY + Math.round(barH * 0.60) + Number(textOffsetEl.value || 0);
 
       textShadow();
       ctx.fillStyle = 'rgba(255,255,255,0.90)';
@@ -864,7 +887,7 @@
     });
   }
 
-  // events
+  // Events
   filesEl.addEventListener('change', async () => {
     const files = [...(filesEl.files || [])];
     slides = [];
@@ -894,12 +917,11 @@
 
   [
     formatEl, fpsEl, secondsEl, blurEl,
-    statusEl, statusColorEl,
-    phoneEl, priceEl,
+    statusEl, statusColorEl, phoneEl, priceEl,
     mainTextEl, textSizeEl, textOffsetEl, showTextEl,
     motionEl, zoomEl,
-    reelPillPosEl, reelPhonePosEl, reelPricePosEl, reelTextStyleEl,
-    cPillPosEl, cPhonePosEl, cPricePosEl, cTextPosEl
+    reelPillPosEl, reelPhonePosEl, reelPricePosEl, reelTextStyleEl, reelRadiusEl, reelPadEl,
+    cPillPosEl, cPhonePosEl, cPricePosEl, cTextPosEl, barHEl, classicPhotoREl
   ].forEach(el => { el.addEventListener('input', redraw); el.addEventListener('change', redraw); });
 
   // init
