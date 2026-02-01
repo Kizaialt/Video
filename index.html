@@ -3,12 +3,13 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Property Reel / 4:3 Generator</title>
+  <title>Property Video Generator</title>
   <style>
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin:0; background:#0b0d12; color:#e7e9ee; }
     header { padding: 16px 18px; border-bottom: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.03); position: sticky; top: 0; z-index: 5; }
     h1 { margin:0; font-size:16px; font-weight:800; }
-    main { display:grid; grid-template-columns: 450px 1fr; gap:16px; padding:16px; }
+    main { display:grid; grid-template-columns: 460px 1fr; gap:16px; padding:16px; }
+
     .panel { background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:14px; }
     .panel h2 { margin:0 0 10px; font-size:13px; opacity:.9; }
     label { display:block; font-size:12px; opacity:.9; margin:10px 0 6px; }
@@ -27,13 +28,19 @@
     button.primary { background:#6d5efc; border-color: rgba(255,255,255,.18); }
     button:disabled { opacity:.55; cursor:not-allowed; }
     .hint { font-size:12px; opacity:.75; line-height:1.4; margin-top:8px; }
+
     .list { max-height: 220px; overflow:auto; border-top: 1px solid rgba(255,255,255,.08); margin-top: 12px; padding-top: 10px; }
     .thumb { display:flex; gap:10px; align-items:center; padding:8px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
     .thumb img { width:44px; height:44px; object-fit:cover; border-radius:8px; border: 1px solid rgba(255,255,255,.10); }
     .thumb div { font-size:12px; opacity:.9; overflow:hidden; text-overflow: ellipsis; white-space: nowrap; }
+
     .stage { background: rgba(255,255,255,.02); border: 1px dashed rgba(255,255,255,.18); border-radius:14px; padding:14px; display:flex; gap:14px; align-items:flex-start; flex-wrap: wrap; }
     canvas { width: 360px; height: auto; border-radius: 12px; background:#111; border:1px solid rgba(255,255,255,.12); }
     video { width: 360px; height: auto; border-radius: 12px; background:#111; border:1px solid rgba(255,255,255,.12); }
+
+    .modeTag { font-size:12px; opacity:.7; margin-top:6px; }
+    .divider { height:1px; background: rgba(255,255,255,.08); margin:12px 0; }
+
     @media (max-width: 980px){
       main { grid-template-columns: 1fr; }
       canvas, video { width: 280px; }
@@ -41,13 +48,13 @@
   </style>
 </head>
 <body>
-<header><h1>Property Generator (Reel 9:16 + 4:3)</h1></header>
+<header><h1>Property Video Generator (Reel + 4:3)</h1></header>
 
 <main>
   <section class="panel">
     <h2>1) Upload photos</h2>
     <input id="files" type="file" accept="image/*" multiple />
-    <div class="hint">Exports a single video. Add audio in IG/TikTok later.</div>
+    <div class="hint">Exports a single video from all photos. Add audio in IG/TikTok later.</div>
 
     <h2 style="margin-top:16px;">2) Format</h2>
     <div class="row">
@@ -57,6 +64,7 @@
           <option value="reel" selected>Reel 9:16 (1080×1920)</option>
           <option value="classic">Classic 4:3 (1080×810)</option>
         </select>
+        <div class="modeTag" id="modeTag"></div>
       </div>
       <div>
         <label>FPS</label>
@@ -75,10 +83,12 @@
       </div>
     </div>
 
-    <h2 style="margin-top:16px;">3) Labels</h2>
+    <div class="divider"></div>
+
+    <h2>3) Text + labels</h2>
     <div class="row">
       <div>
-        <label>Status</label>
+        <label>Status (pill)</label>
         <select id="status">
           <option value="Түрээс" selected>Түрээс</option>
           <option value="Борлуулах">Борлуулах</option>
@@ -102,32 +112,35 @@
       </div>
     </div>
 
-    <h2 style="margin-top:16px;">4) Positions</h2>
-    <div class="hint">For 4:3, these positions apply to the bottom bar (below the image).</div>
-
     <div class="row">
       <div>
         <label>Pill position</label>
         <select id="pillPos">
-          <option value="bl" selected>Bottom bar left</option>
-          <option value="br">Bottom bar right</option>
+          <option value="tl" selected>Top-left</option>
+          <option value="tr">Top-right</option>
+          <option value="bl">Bottom-left</option>
+          <option value="br">Bottom-right</option>
         </select>
       </div>
       <div>
-        <label>Price position</label>
-        <select id="pricePos">
-          <option value="bl" selected>Bottom bar left</option>
-          <option value="br">Bottom bar right</option>
+        <label>Phone position</label>
+        <select id="phonePos">
+          <option value="tr" selected>Top-right</option>
+          <option value="tl">Top-left</option>
+          <option value="br">Bottom-right</option>
+          <option value="bl">Bottom-left</option>
         </select>
       </div>
     </div>
 
     <div class="row">
       <div>
-        <label>Phone position</label>
-        <select id="phonePos">
-          <option value="br" selected>Bottom bar right</option>
-          <option value="bl">Bottom bar left</option>
+        <label>Price position</label>
+        <select id="pricePos">
+          <option value="br" selected>Bottom-right</option>
+          <option value="bl">Bottom-left</option>
+          <option value="tr">Top-right</option>
+          <option value="tl">Top-left</option>
         </select>
       </div>
       <div>
@@ -139,8 +152,7 @@
       </div>
     </div>
 
-    <h2 style="margin-top:16px;">5) Text</h2>
-    <div class="hint">Supports **bold**, _italic_, and **_both_**.</div>
+    <div class="hint">Text supports **bold**, _italic_, **_both_**.</div>
     <textarea id="mainText">Шунхир 245-р байранд **47.05м.кв** байр
 - 11/16 давхарт
 - Баруун талруу харсан харуутай
@@ -149,7 +161,7 @@
     <div class="row">
       <div>
         <label>Text size</label>
-        <input id="textSize" type="range" min="22" max="48" value="32" />
+        <input id="textSize" type="range" min="20" max="48" value="30" />
       </div>
       <div>
         <label>Text Y offset</label>
@@ -157,7 +169,9 @@
       </div>
     </div>
 
-    <h2 style="margin-top:16px;">6) Motion</h2>
+    <div class="divider"></div>
+
+    <h2>4) Motion</h2>
     <div class="row">
       <div>
         <label>Photo motion</label>
@@ -172,7 +186,7 @@
       </div>
     </div>
 
-    <h2 style="margin-top:16px;">7) Export</h2>
+    <h2 style="margin-top:16px;">5) Export</h2>
     <div class="row">
       <button id="btnPreview">Redraw</button>
       <button id="btnVideo" class="primary">Generate Video</button>
@@ -199,42 +213,47 @@
 
 <script>
 (() => {
-  const filesEl = document.getElementById('files');
-  const listEl  = document.getElementById('list');
-  const formatEl = document.getElementById('format');
-  const fpsEl = document.getElementById('fps');
-  const secondsEl = document.getElementById('seconds');
-  const blurEl = document.getElementById('blur');
+  // ===== DOM =====
+  const $ = (id) => document.getElementById(id);
 
-  const statusEl = document.getElementById('status');
-  const statusColorEl = document.getElementById('statusColor');
+  const filesEl = $('files');
+  const listEl  = $('list');
+  const formatEl = $('format');
+  const modeTagEl = $('modeTag');
 
-  const priceEl = document.getElementById('price');
-  const phoneEl = document.getElementById('phone');
+  const fpsEl = $('fps');
+  const secondsEl = $('seconds');
+  const blurEl = $('blur');
 
-  const pillPosEl = document.getElementById('pillPos');
-  const pricePosEl = document.getElementById('pricePos');
-  const phonePosEl = document.getElementById('phonePos');
-  const showTextEl = document.getElementById('showText');
+  const statusEl = $('status');
+  const statusColorEl = $('statusColor');
+  const priceEl = $('price');
+  const phoneEl = $('phone');
 
-  const mainTextEl = document.getElementById('mainText');
-  const textSizeEl = document.getElementById('textSize');
-  const textOffsetEl = document.getElementById('textOffset');
+  const pillPosEl = $('pillPos');
+  const phonePosEl = $('phonePos');
+  const pricePosEl = $('pricePos');
+  const showTextEl = $('showText');
 
-  const motionEl = document.getElementById('motion');
-  const zoomEl = document.getElementById('zoom');
+  const mainTextEl = $('mainText');
+  const textSizeEl = $('textSize');
+  const textOffsetEl = $('textOffset');
 
-  const btnPreview = document.getElementById('btnPreview');
-  const btnVideo = document.getElementById('btnVideo');
-  const hintEl = document.getElementById('hint');
-  const vid = document.getElementById('vid');
+  const motionEl = $('motion');
+  const zoomEl = $('zoom');
 
-  const canvas = document.getElementById('canvas');
+  const btnPreview = $('btnPreview');
+  const btnVideo = $('btnVideo');
+  const hintEl = $('hint');
+  const vid = $('vid');
+
+  const canvas = $('canvas');
   const ctx = canvas.getContext('2d');
 
   let slides = [];
   let currentIndex = 0;
 
+  // ===== Helpers =====
   function hint(msg){ hintEl.textContent = msg || ""; }
 
   function getSize(){
@@ -273,7 +292,7 @@
 
   function textShadow(){
     ctx.shadowColor = 'rgba(0,0,0,0.55)';
-    ctx.shadowBlur = 18;
+    ctx.shadowBlur = 16;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 6;
   }
@@ -284,7 +303,7 @@
     ctx.shadowOffsetY = 0;
   }
 
-  // Markup: **bold**, _italic_, **_both_**
+  // ===== Markup: **bold**, _italic_, **_both_**
   function parseMarkupToRuns(line){
     const runs = [];
     let i = 0;
@@ -342,15 +361,12 @@
       }
       const words = raw.split(/\s+/);
       let cur = "";
-
       const pushCur = () => { if(cur !== "") { out.push(parseMarkupToRuns(cur)); cur = ""; } };
-
       for(const w of words){
         const test = cur ? (cur + " " + w) : w;
         const runs = parseMarkupToRuns(test);
         if(measureRuns(runs, sizePx) > maxWidth && cur){
-          pushCur();
-          cur = w;
+          pushCur(); cur = w;
         } else cur = test;
       }
       pushCur();
@@ -358,74 +374,189 @@
     return out;
   }
 
-  function pickRecorderMime(){
-    const candidates = [
-      'video/mp4;codecs=h264',
-      'video/mp4',
-      'video/webm;codecs=vp9',
-      'video/webm;codecs=vp8',
-      'video/webm'
-    ];
-    for(const m of candidates){
-      if(window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m;
-    }
-    return '';
+  // ===== Chips =====
+  function drawChip(text, x, y, anchor, bg, fg, fontPx, padX, padY, radius){
+    if(!text) return { w:0, h:0 };
+    ctx.font = `900 ${fontPx}px system-ui, -apple-system, Segoe UI, Roboto, sans-serif`;
+    const tw = ctx.measureText(text).width;
+    const w = Math.ceil(tw + padX*2);
+    const h = Math.ceil(fontPx + padY*2);
+
+    let rx = x, ry = y;
+    if(anchor === 'tr'){ rx = Math.round(x - w); ry = Math.round(y); }
+    if(anchor === 'tl'){ rx = Math.round(x); ry = Math.round(y); }
+    if(anchor === 'br'){ rx = Math.round(x - w); ry = Math.round(y - h); }
+    if(anchor === 'bl'){ rx = Math.round(x); ry = Math.round(y - h); }
+
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    drawRoundedRect(ctx, rx+4, ry+6, w, h, radius);
+    ctx.fill();
+
+    ctx.fillStyle = bg;
+    drawRoundedRect(ctx, rx, ry, w, h, radius);
+    ctx.fill();
+
+    ctx.fillStyle = fg;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'left';
+    ctx.fillText(text, rx + padX, ry + h/2);
+
+    return { w, h, x: rx, y: ry };
   }
 
-  async function fileToImage(file){
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.decoding = 'async';
-    img.loading = 'eager';
-    await new Promise((res, rej) => {
-      img.onload = () => res();
-      img.onerror = () => rej(new Error('Failed to load image'));
-      img.src = url;
-    });
-    return { img, url, name: file.name };
+  function posToAnchor(pos){
+    // tl,tr,bl,br
+    return pos;
   }
 
-  function renderList(){
-    listEl.innerHTML = "";
-    slides.forEach((s, i) => {
-      const row = document.createElement('div');
-      row.className = 'thumb';
-      const thumb = document.createElement('img');
-      thumb.src = s.url;
-      const meta = document.createElement('div');
-      meta.textContent = `${i+1}. ${s.name}`;
-      row.appendChild(thumb);
-      row.appendChild(meta);
-      row.onclick = () => { currentIndex = i; redraw(); };
-      listEl.appendChild(row);
-    });
-  }
-
-  // ===== Layout: 4:3 =====
-  function drawClassic43(img, t){
-    const {W,H} = getSize(); // 1080x810
+  // ===== Background =====
+  function drawBlurBG(img, W, H){
     const blurPx = Number(blurEl.value || 18);
-
-    // Background blur
     ctx.save();
     ctx.filter = `blur(${blurPx}px)`;
     const bgFit = fitRect(img.naturalWidth, img.naturalHeight, W, H, 'cover');
     ctx.drawImage(img, bgFit.x, bgFit.y, bgFit.w, bgFit.h);
     ctx.restore();
-    ctx.fillStyle = 'rgba(0,0,0,0.20)';
+    ctx.fillStyle = 'rgba(0,0,0,0.22)';
     ctx.fillRect(0,0,W,H);
+  }
 
-    // Photo area (top)
+  // ===== REEL Layout (matches your screenshot) =====
+  function drawReel916(img, t){
+    const {W,H} = getSize(); // 1080x1920
+    drawBlurBG(img, W, H);
+
+    // Card container like your reference (rounded light frame)
+    const cardPad = 42;
+    const cardX = cardPad;
+    const cardY = cardPad;
+    const cardW = W - cardPad*2;
+    const cardH = H - cardPad*2;
+
+    // Light card background
+    ctx.fillStyle = 'rgba(255,255,255,0.10)';
+    drawRoundedRect(ctx, cardX, cardY, cardW, cardH, 46);
+    ctx.fill();
+
+    // Inner photo area (top part of card)
+    const innerPad = 22;
+    const photoX = cardX + innerPad;
+    const photoY = cardY + innerPad;
+    const photoW = cardW - innerPad*2;
+    const photoH = Math.round(cardH * 0.60); // big photo, text below
+
+    // Photo draw (cover + motion) clipped to rounded rect
+    const baseFit = fitRect(img.naturalWidth, img.naturalHeight, photoW, photoH, 'cover');
+    const useMotion = (motionEl.value === 'photo');
+    const strength = Number(zoomEl.value || 4) / 100;
+
+    const z = useMotion ? (1 + strength * t) : 1;
+    const panX = useMotion ? ((t - 0.5) * 22) : 0;
+    const panY = useMotion ? ((0.5 - t) * 10) : 0;
+
+    const drawW = baseFit.w * z;
+    const drawH = baseFit.h * z;
+    const dx = photoX + baseFit.x - (drawW - baseFit.w)/2 + panX;
+    const dy = photoY + baseFit.y - (drawH - baseFit.h)/2 + panY;
+
+    ctx.save();
+    drawRoundedRect(ctx, photoX, photoY, photoW, photoH, 34);
+    ctx.clip();
+    ctx.filter = 'none';
+    ctx.drawImage(img, dx, dy, drawW, drawH);
+    ctx.restore();
+
+    // Photo top chips: Pill TL/TR, Phone TL/TR
+    const status = (statusEl.value || "").trim();
+    const phone = (phoneEl.value || "").trim();
+    const price = (priceEl.value || "").trim();
+
+    const chipFont = 40;
+    const chipPadX = 22, chipPadY = 14, chipR = 999;
+    const safe = 18;
+
+    // Pill
+    const pillAnchor = posToAnchor(pillPosEl.value);
+    const pillX = (pillAnchor.includes('r')) ? (photoX + photoW - safe) : (photoX + safe);
+    const pillY = (pillAnchor.includes('b')) ? (photoY + photoH - safe) : (photoY + safe);
+    drawChip(status, pillX, pillY, pillAnchor,
+      statusColorEl.value || '#2bd576', 'rgba(0,0,0,0.72)',
+      40, 22, 14, 999
+    );
+
+    // Phone
+    const phoneAnchor = posToAnchor(phonePosEl.value);
+    const phoneX = (phoneAnchor.includes('r')) ? (photoX + photoW - safe) : (photoX + safe);
+    const phoneY = (phoneAnchor.includes('b')) ? (photoY + photoH - safe) : (photoY + safe);
+    drawChip("📞 " + phone, phoneX, phoneY, phoneAnchor,
+      'rgba(0,0,0,0.45)', 'rgba(255,255,255,0.92)',
+      38, 20, 14, 999
+    );
+
+    // Price chip (usually bottom-right on photo)
+    const priceAnchor = posToAnchor(pricePosEl.value);
+    const priceX = (priceAnchor.includes('r')) ? (photoX + photoW - safe) : (photoX + safe);
+    const priceY = (priceAnchor.includes('b')) ? (photoY + photoH - safe) : (photoY + safe);
+    drawChip(price, priceX, priceY, priceAnchor,
+      'rgba(0,0,0,0.55)', 'rgba(255,255,255,0.92)',
+      40, 22, 14, 18
+    );
+
+    // Text box area below photo (inside card)
+    if(showTextEl.value === 'yes'){
+      const boxX = photoX;
+      const boxY = photoY + photoH + 18;
+      const boxW = photoW;
+      const boxH = cardY + cardH - innerPad - boxY;
+
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      drawRoundedRect(ctx, boxX, boxY, boxW, boxH, 28);
+      ctx.fill();
+
+      // Slight blur effect behind (fake by overlay)
+      const g = ctx.createLinearGradient(0, boxY, 0, boxY + boxH);
+      g.addColorStop(0, 'rgba(255,255,255,0.06)');
+      g.addColorStop(1, 'rgba(255,255,255,0.02)');
+      ctx.fillStyle = g;
+      drawRoundedRect(ctx, boxX, boxY, boxW, boxH, 28);
+      ctx.fill();
+
+      const padX = 28;
+      const maxW = boxW - padX*2;
+      const size = Number(textSizeEl.value || 30);
+      const lines = wrapMarkupText(mainTextEl.value || "", maxW, size);
+      const lineH = Math.round(size * 1.25);
+
+      let y = boxY + 46 + Number(textOffsetEl.value || 0);
+
+      textShadow();
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      ctx.textBaseline = 'alphabetic';
+      ctx.textAlign = 'left';
+      for(const runs of lines){
+        if(y > boxY + boxH - 18) break;
+        if(runs.length === 1 && runs[0].text === "") { y += lineH; continue; }
+        drawRuns(runs, boxX + padX, y, size);
+        y += lineH;
+      }
+      clearShadow();
+    }
+  }
+
+  // ===== 4:3 Layout (photo top + bottom bar) =====
+  function drawClassic43(img, t){
+    const {W,H} = getSize(); // 1080x810
+    drawBlurBG(img, W, H);
+
     const pad = 24;
-    const barH = Math.round(H * 0.24);              // bottom bar height
-    const photoH = H - barH - pad;                  // photo area height
+    const barH = Math.round(H * 0.28);
+    const photoH = H - barH - pad;
     const photoX = pad;
     const photoY = pad;
     const photoW = W - pad*2;
 
-    // Draw photo (cover) into photo box with clipping
+    // Photo cover + motion clipped
     const baseFit = fitRect(img.naturalWidth, img.naturalHeight, photoW, photoH, 'cover');
-
     const useMotion = (motionEl.value === 'photo');
     const strength = Number(zoomEl.value || 4) / 100;
     const z = useMotion ? (1 + strength * t) : 1;
@@ -444,25 +575,11 @@
     ctx.drawImage(img, dx, dy, drawW, drawH);
     ctx.restore();
 
-    // Photo subtle vignette
-    const v = ctx.createLinearGradient(0, photoY, 0, photoY + photoH);
-    v.addColorStop(0.0,'rgba(0,0,0,0.14)');
-    v.addColorStop(0.2,'rgba(0,0,0,0.00)');
-    v.addColorStop(0.8,'rgba(0,0,0,0.00)');
-    v.addColorStop(1.0,'rgba(0,0,0,0.18)');
-    ctx.fillStyle = v;
-    ctx.save();
-    drawRoundedRect(ctx, photoX, photoY, photoW, photoH, 22);
-    ctx.clip();
-    ctx.fillRect(photoX, photoY, photoW, photoH);
-    ctx.restore();
-
-    // Bottom bar (below image)
+    // Bottom bar
     const barX = pad;
     const barY = photoY + photoH + 12;
     const barW = W - pad*2;
 
-    // Bar background
     ctx.fillStyle = 'rgba(0,0,0,0.35)';
     drawRoundedRect(ctx, barX, barY, barW, barH, 22);
     ctx.fill();
@@ -474,183 +591,60 @@
     drawRoundedRect(ctx, barX, barY, barW, barH, 22);
     ctx.fill();
 
-    // Positions inside bar
-    const leftX  = barX + 26;
+    const leftX = barX + 26;
     const rightX = barX + barW - 26;
-    const topY   = barY + 34;
-    const midY   = barY + Math.round(barH * 0.46);
-    const textY  = barY + Math.round(barH * 0.72);
 
-    // Pill (top row of bar, left or right)
-    const status = (statusEl.value || "Түрээс").trim();
-    const statusColor = statusColorEl.value || "#2bd576";
-    const pillH = 46;
-    const pillPadX = 18;
-    ctx.font = `900 26px system-ui, -apple-system, Segoe UI, Roboto, sans-serif`;
-    const pillTextW = ctx.measureText(status).width;
-    const pillW = Math.ceil(pillTextW + pillPadX*2);
-
-    const pillX = (pillPosEl.value === 'br') ? Math.round(rightX - pillW) : leftX;
-    const pillY = Math.round(barY + 16);
-
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    drawRoundedRect(ctx, pillX+4, pillY+6, pillW, pillH, 999);
-    ctx.fill();
-
-    ctx.fillStyle = statusColor;
-    drawRoundedRect(ctx, pillX, pillY, pillW, pillH, 999);
-    ctx.fill();
-
-    ctx.fillStyle = 'rgba(0,0,0,0.75)';
-    ctx.textBaseline = 'middle';
-    ctx.textAlign = 'left';
-    ctx.fillText(status, pillX + pillPadX, pillY + pillH/2);
-
-    // Price + Phone (mid row)
-    const price = (priceEl.value || "").trim();
+    // Pill/Phone/Price positions in the bar corners
+    const status = (statusEl.value || "").trim();
     const phone = (phoneEl.value || "").trim();
+    const price = (priceEl.value || "").trim();
+    const statusColor = statusColorEl.value || '#2bd576';
 
-    ctx.shadowColor = 'transparent';
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    ctx.textBaseline = 'alphabetic';
-    ctx.font = `900 28px system-ui, -apple-system, Segoe UI, Roboto, sans-serif`;
+    const safeXl = leftX, safeXr = rightX;
+    const safeYt = barY + 20, safeYb = barY + barH - 20;
 
-    if(price){
-      ctx.textAlign = (pricePosEl.value === 'br') ? 'right' : 'left';
-      const x = (pricePosEl.value === 'br') ? rightX : leftX;
-      ctx.fillText(price, x, midY);
-    }
+    const anchorFor = (pos) => posToAnchor(pos);
 
-    if(phone){
-      ctx.font = `800 26px system-ui, -apple-system, Segoe UI, Roboto, sans-serif`;
-      ctx.textAlign = (phonePosEl.value === 'br') ? 'right' : 'left';
-      const x = (phonePosEl.value === 'br') ? rightX : leftX;
-      ctx.fillText("📞 " + phone, x, midY + 34);
-    }
+    // Pill
+    const pillA = anchorFor(pillPosEl.value);
+    const pillX = pillA.includes('r') ? safeXr : safeXl;
+    const pillY = pillA.includes('b') ? safeYb : safeYt;
+    drawChip(status, pillX, pillY, pillA, statusColor, 'rgba(0,0,0,0.75)', 26, 18, 12, 999);
 
-    // Bottom bar text (optional)
+    // Phone
+    const phoneA = anchorFor(phonePosEl.value);
+    const phX = phoneA.includes('r') ? safeXr : safeXl;
+    const phY = phoneA.includes('b') ? safeYb : safeYt;
+    drawChip("📞 " + phone, phX, phY, phoneA, 'rgba(0,0,0,0.45)', 'rgba(255,255,255,0.92)', 24, 16, 12, 999);
+
+    // Price
+    const priceA = anchorFor(pricePosEl.value);
+    const prX = priceA.includes('r') ? safeXr : safeXl;
+    const prY = priceA.includes('b') ? safeYb : safeYt;
+    drawChip(price, prX, prY, priceA, 'rgba(0,0,0,0.55)', 'rgba(255,255,255,0.92)', 26, 18, 12, 18);
+
+    // Long text in bar center (optional)
     if(showTextEl.value === 'yes'){
-      const size = Number(textSizeEl.value || 32);
+      const size = Number(textSizeEl.value || 28);
       const maxW = barW - 52;
-      const runsLines = wrapMarkupText(mainTextEl.value || "", maxW, size);
-
-      // Start inside bar, not over photo
-      let y = textY + Number(textOffsetEl.value || 0);
+      const lines = wrapMarkupText(mainTextEl.value || "", maxW, size);
       const lineH = Math.round(size * 1.22);
+
+      let y = barY + Math.round(barH * 0.55) + Number(textOffsetEl.value || 0);
 
       textShadow();
       ctx.fillStyle = 'rgba(255,255,255,0.90)';
       ctx.textAlign = 'left';
-      for(const runs of runsLines){
-        if(y > barY + barH - 10) break; // stop if overflow
+      ctx.textBaseline = 'alphabetic';
+
+      for(const runs of lines){
+        if(y > barY + barH - 18) break;
         if(runs.length === 1 && runs[0].text === "") { y += lineH; continue; }
         drawRuns(runs, leftX, y, size);
         y += lineH;
       }
       clearShadow();
     }
-  }
-
-  // ===== Layout: Reel 9:16 (keeps your older style but simplified) =====
-  function drawReel916(img, t){
-    const {W,H} = getSize(); // 1080x1920
-    const blurPx = Number(blurEl.value || 18);
-
-    // BG blur cover
-    ctx.save();
-    ctx.filter = `blur(${blurPx}px)`;
-    const bgFit = fitRect(img.naturalWidth, img.naturalHeight, W, H, 'cover');
-    ctx.drawImage(img, bgFit.x, bgFit.y, bgFit.w, bgFit.h);
-    ctx.restore();
-    ctx.fillStyle = 'rgba(0,0,0,0.22)';
-    ctx.fillRect(0,0,W,H);
-
-    // Hero 16:9 full width
-    const heroW = W;
-    const heroH = Math.round(W * 9 / 16);
-    const heroX = 0;
-    const heroY = Math.round(H * 0.10);
-
-    const baseFit = fitRect(img.naturalWidth, img.naturalHeight, heroW, heroH, 'cover');
-
-    const useMotion = (motionEl.value === 'photo');
-    const strength = Number(zoomEl.value || 4) / 100;
-    const z = useMotion ? (1 + strength * t) : 1;
-    const panX = useMotion ? ((t - 0.5) * 26) : 0;
-    const panY = useMotion ? ((0.5 - t) * 10) : 0;
-
-    const drawW = baseFit.w * z;
-    const drawH = baseFit.h * z;
-    const dx = heroX + baseFit.x - (drawW - baseFit.w)/2 + panX;
-    const dy = heroY + baseFit.y - (drawH - baseFit.h)/2 + panY;
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(heroX, heroY, heroW, heroH);
-    ctx.clip();
-    ctx.filter = 'none';
-    ctx.drawImage(img, dx, dy, drawW, drawH);
-    ctx.restore();
-
-    // bottom gradient panel
-    const panelTop = heroY + heroH + 40;
-    const panelGrad = ctx.createLinearGradient(0, panelTop - 120, 0, H);
-    panelGrad.addColorStop(0, 'rgba(0,0,0,0.00)');
-    panelGrad.addColorStop(1, 'rgba(0,0,0,0.62)');
-    ctx.fillStyle = panelGrad;
-    ctx.fillRect(0, panelTop - 120, W, H - (panelTop - 120));
-
-    // pill pinned at hero bottom edge
-    const status = (statusEl.value || "Түрээс").trim();
-    const statusColor = statusColorEl.value || "#2bd576";
-    ctx.font = '900 40px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
-    const pillTextW = ctx.measureText(status).width;
-    const pillPadX = 22;
-    const pillH = 70;
-    const pillW = Math.ceil(pillTextW + pillPadX*2);
-    const pillX = 70;
-    const pillY = Math.round(heroY + heroH - pillH/2);
-
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    drawRoundedRect(ctx, pillX+6, pillY+10, pillW, pillH, 999);
-    ctx.fill();
-    ctx.fillStyle = statusColor;
-    drawRoundedRect(ctx, pillX, pillY, pillW, pillH, 999);
-    ctx.fill();
-    ctx.fillStyle = 'rgba(0,0,0,0.75)';
-    ctx.textBaseline = 'middle';
-    ctx.textAlign = 'left';
-    ctx.fillText(status, pillX + pillPadX, pillY + pillH/2);
-
-    // bottom-left price, bottom-right phone (simple)
-    const padX = 70;
-    ctx.shadowColor = 'transparent';
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    ctx.font = '900 40px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(priceEl.value || "", padX, H - 120);
-    ctx.textAlign = 'right';
-    ctx.font = '900 40px system-ui, -apple-system, Segoe UI, Roboto, sans-serif';
-    ctx.fillText("📞 " + (phoneEl.value || ""), W - padX, H - 120);
-
-    // text block
-    const size = Number(textSizeEl.value || 32);
-    const maxW = W - padX*2;
-    const runsLines = wrapMarkupText(mainTextEl.value || "", maxW, size);
-
-    let y = Math.max(panelTop + 20, pillY + pillH + 34) + Number(textOffsetEl.value || 0);
-    const lineH = Math.round(size * 1.28);
-
-    textShadow();
-    ctx.fillStyle = 'rgba(255,255,255,0.90)';
-    ctx.textAlign = 'left';
-    for(const runs of runsLines){
-      if(y > H - 180) break;
-      if(runs.length === 1 && runs[0].text === "") { y += lineH; continue; }
-      drawRuns(runs, padX, y, size);
-      y += lineH;
-    }
-    clearShadow();
   }
 
   function drawFrame(img, t){
@@ -661,6 +655,10 @@
 
   function redraw(){
     applyCanvasSize();
+    modeTagEl.textContent = (formatEl.value === 'classic')
+      ? "4:3 Mode: photo + bottom bar (all labels in bar)"
+      : "Reel Mode: card layout (pill TL/TR, phone TR, price chip on photo, text box below)";
+
     if(!slides.length){
       const {W,H} = getSize();
       ctx.clearRect(0,0,W,H);
@@ -672,6 +670,20 @@
       return;
     }
     drawFrame(slides[currentIndex].img, 0);
+  }
+
+  function pickRecorderMime(){
+    const candidates = [
+      'video/mp4;codecs=h264',
+      'video/mp4',
+      'video/webm;codecs=vp9',
+      'video/webm;codecs=vp8',
+      'video/webm'
+    ];
+    for(const m of candidates){
+      if(window.MediaRecorder && MediaRecorder.isTypeSupported(m)) return m;
+    }
+    return '';
   }
 
   async function downloadBlob(blob, filename){
@@ -738,7 +750,36 @@
     btnVideo.disabled = false; btnPreview.disabled = false;
   }
 
-  // events
+  async function fileToImage(file){
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.decoding = 'async';
+    img.loading = 'eager';
+    await new Promise((res, rej) => {
+      img.onload = () => res();
+      img.onerror = () => rej(new Error('Failed to load image'));
+      img.src = url;
+    });
+    return { img, url, name: file.name };
+  }
+
+  function renderList(){
+    listEl.innerHTML = "";
+    slides.forEach((s, i) => {
+      const row = document.createElement('div');
+      row.className = 'thumb';
+      const thumb = document.createElement('img');
+      thumb.src = s.url;
+      const meta = document.createElement('div');
+      meta.textContent = `${i+1}. ${s.name}`;
+      row.appendChild(thumb);
+      row.appendChild(meta);
+      row.onclick = () => { currentIndex = i; redraw(); };
+      listEl.appendChild(row);
+    });
+  }
+
+  // ===== Events =====
   filesEl.addEventListener('change', async () => {
     const files = [...(filesEl.files || [])];
     slides = [];
@@ -770,7 +811,7 @@
     formatEl, fpsEl, secondsEl, blurEl,
     statusEl, statusColorEl,
     priceEl, phoneEl,
-    pillPosEl, pricePosEl, phonePosEl, showTextEl,
+    pillPosEl, phonePosEl, pricePosEl, showTextEl,
     mainTextEl, textSizeEl, textOffsetEl,
     motionEl, zoomEl
   ].forEach(el => { el.addEventListener('input', redraw); el.addEventListener('change', redraw); });
