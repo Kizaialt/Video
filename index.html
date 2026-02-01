@@ -153,50 +153,33 @@
     <!-- REEL CONTROLS -->
     <div id="reelControls">
       <h2>4) Reel options</h2>
-      <div class="hint">Reel uses a TRUE 16:9 photo on a 9:16 canvas, text below.</div>
+      <div class="hint">Reel: 16:9 photo on 9:16 canvas. Chips live in textbox (not on photo).</div>
 
       <div class="row">
         <div>
-          <label>Pill</label>
-          <select id="reelPillPos">
-            <option value="tl" selected>Top-left</option>
-            <option value="tr">Top-right</option>
-          </select>
-        </div>
-        <div>
-          <label>Phone</label>
-          <select id="reelPhonePos">
-            <option value="tr" selected>Top-right</option>
-            <option value="tl">Top-left</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="row">
-        <div>
-          <label>Price</label>
-          <select id="reelPricePos">
-            <option value="br" selected>Bottom-right (on photo)</option>
-            <option value="bl">Bottom-left (on photo)</option>
-          </select>
-        </div>
-        <div>
-          <label>Text box style</label>
+          <label>Textbox style</label>
           <select id="reelTextStyle">
             <option value="below" selected>Below photo</option>
-            <option value="overlay">Overlay on photo bottom</option>
+            <option value="overlay">Overlay (chips still inside overlay)</option>
           </select>
         </div>
-      </div>
-
-      <div class="row">
         <div>
           <label>Card radius</label>
           <input id="reelRadius" type="range" min="10" max="80" value="46" />
         </div>
+      </div>
+
+      <div class="row">
         <div>
           <label>Card padding</label>
           <input id="reelPad" type="range" min="20" max="80" value="42" />
+        </div>
+        <div>
+          <label>Chip alignment in textbox</label>
+          <select id="reelChipLayout">
+            <option value="row" selected>One row (pill left, phone right, price right-below)</option>
+            <option value="stack">Stacked (pill/phone top, price bottom)</option>
+          </select>
         </div>
       </div>
     </div>
@@ -204,18 +187,18 @@
     <!-- CLASSIC CONTROLS -->
     <div id="classicControls" class="hide">
       <h2>4) 4:3 options</h2>
-      <div class="hint">4:3 uses photo on top + bottom bar. Text on left, phone top-right, price bottom-right.</div>
+      <div class="hint">4:3: pill/phone/price ON PHOTO. Clean textbox below (narrower than photo).</div>
 
       <div class="row">
         <div>
-          <label>Pill (bar)</label>
+          <label>Pill (photo)</label>
           <select id="cPillPos">
             <option value="tl" selected>Top-left</option>
             <option value="tr">Top-right</option>
           </select>
         </div>
         <div>
-          <label>Phone (bar)</label>
+          <label>Phone (photo)</label>
           <select id="cPhonePos">
             <option value="tr" selected>Top-right</option>
             <option value="tl">Top-left</option>
@@ -225,25 +208,22 @@
 
       <div class="row">
         <div>
-          <label>Price (bar)</label>
+          <label>Price (photo)</label>
           <select id="cPricePos">
             <option value="br" selected>Bottom-right</option>
             <option value="bl">Bottom-left</option>
           </select>
         </div>
         <div>
-          <label>Text position</label>
-          <select id="cTextPos">
-            <option value="left" selected>Left</option>
-            <option value="center">Center-ish</option>
-          </select>
+          <label>Textbox side inset</label>
+          <input id="boxInset" type="range" min="20" max="120" value="64" />
         </div>
       </div>
 
       <div class="row">
         <div>
-          <label>Bar height</label>
-          <input id="barH" type="range" min="140" max="320" value="220" />
+          <label>Photo height (smaller = more text space)</label>
+          <input id="photoH43" type="range" min="0.45" max="0.72" step="0.01" value="0.58" />
         </div>
         <div>
           <label>Photo radius</label>
@@ -308,18 +288,16 @@
   const reelControls = $('reelControls');
   const classicControls = $('classicControls');
 
-  const reelPillPosEl = $('reelPillPos');
-  const reelPhonePosEl = $('reelPhonePos');
-  const reelPricePosEl = $('reelPricePos');
   const reelTextStyleEl = $('reelTextStyle');
   const reelRadiusEl = $('reelRadius');
   const reelPadEl = $('reelPad');
+  const reelChipLayoutEl = $('reelChipLayout');
 
   const cPillPosEl = $('cPillPos');
   const cPhonePosEl = $('cPhonePos');
   const cPricePosEl = $('cPricePos');
-  const cTextPosEl = $('cTextPos');
-  const barHEl = $('barH');
+  const boxInsetEl = $('boxInset');
+  const photoH43El = $('photoH43');
   const classicPhotoREl = $('classicPhotoR');
 
   const btnPreview = $('btnPreview');
@@ -389,7 +367,7 @@
     ctx.shadowOffsetY = 0;
   }
 
-  // Markup parsing: **bold**, _italic_, **_both_**
+  // Markup: **bold**, _italic_, **_both_**
   function parseMarkupToRuns(line){
     const runs = [];
     let i = 0;
@@ -505,7 +483,7 @@
     drawBlurBG(img, W, H);
 
     const cardPad = Number(reelPadEl.value || 42);
-    const radius = Number(reelRadiusEl.value || 46);
+    const radius  = Number(reelRadiusEl.value || 46);
 
     const cardX = cardPad, cardY = cardPad;
     const cardW = W - cardPad*2, cardH = H - cardPad*2;
@@ -519,15 +497,15 @@
     const photoY = cardY + innerPad;
     const photoW = cardW - innerPad*2;
 
-    // ✅ TRUE 16:9 based on width (NOT square)
+    // TRUE 16:9 photo
     const photoH = Math.round(photoW * 9 / 16);
 
     // Photo cover + motion
     const baseFit = fitRect(img.naturalWidth, img.naturalHeight, photoW, photoH, 'cover');
     const useMotion = (motionEl.value === 'photo');
-    const strength = Number(zoomEl.value || 4) / 100;
+    const strength  = Number(zoomEl.value || 4) / 100;
 
-    const z = useMotion ? (1 + strength * t) : 1;
+    const z    = useMotion ? (1 + strength * t) : 1;
     const panX = useMotion ? ((t - 0.5) * 22) : 0;
     const panY = useMotion ? ((0.5 - t) * 10) : 0;
 
@@ -543,104 +521,136 @@
     ctx.drawImage(img, dx, dy, drawW, drawH);
     ctx.restore();
 
-    // Chip anchors relative to photo
-    const safe = 18;
-    const tl = {x: photoX + safe, y: photoY + safe, a:'tl'};
-    const tr = {x: photoX + photoW - safe, y: photoY + safe, a:'tr'};
-    const bl = {x: photoX + safe, y: photoY + photoH - safe, a:'bl'};
-    const br = {x: photoX + photoW - safe, y: photoY + photoH - safe, a:'br'};
-
-    const pick = (pos) => (pos === 'tl' ? tl : pos === 'tr' ? tr : pos === 'bl' ? bl : br);
-
+    // Chips should NOT be on photo. Put them in textbox / overlay box.
     const status = (statusEl.value || "").trim();
     const phone  = (phoneEl.value || "").trim();
     const price  = (priceEl.value || "").trim();
+    const size   = Number(textSizeEl.value || 30);
 
-    // Pill (top)
-    const pillPos = pick(reelPillPosEl.value);
-    drawChip(status, pillPos.x, pillPos.y, pillPos.a, statusColorEl.value || '#2bd576', 'rgba(0,0,0,0.72)', 40, 22, 14, 999);
+    // If user disables text, still render a small clean chip bar below photo
+    if(showTextEl.value !== 'yes'){
+      const miniY = photoY + photoH + 18;
+      const miniH = 92;
+      const miniX = photoX, miniW = photoW;
 
-    // Phone (top)
-    const phonePos = pick(reelPhonePosEl.value);
-    drawChip("📞 " + phone, phonePos.x, phonePos.y, phonePos.a, 'rgba(0,0,0,0.45)', 'rgba(255,255,255,0.92)', 38, 20, 14, 999);
+      ctx.fillStyle = 'rgba(20,22,28,0.78)';
+      drawRoundedRect(ctx, miniX, miniY, miniW, miniH, 20);
+      ctx.fill();
 
-    // Price (bottom on photo)
-    const pricePos = pick(reelPricePosEl.value);
-    drawChip(price, pricePos.x, pricePos.y, pricePos.a, 'rgba(0,0,0,0.55)', 'rgba(255,255,255,0.92)', 40, 22, 14, 18);
+      ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+      ctx.lineWidth = 2;
+      drawRoundedRect(ctx, miniX, miniY, miniW, miniH, 20);
+      ctx.stroke();
 
-    // Text
-    if(showTextEl.value === 'yes'){
-      const size = Number(textSizeEl.value || 30);
+      const pad = 18;
+      drawChip(status, miniX + pad, miniY + pad, 'tl',
+        statusColorEl.value || '#2bd576', 'rgba(0,0,0,0.72)', 34, 18, 12, 999);
+      drawChip("📞 " + phone, miniX + miniW - pad, miniY + pad, 'tr',
+        'rgba(0,0,0,0.45)', 'rgba(255,255,255,0.92)', 32, 16, 12, 999);
+      drawChip(price, miniX + miniW - pad, miniY + miniH - pad, 'br',
+        'rgba(0,0,0,0.55)', 'rgba(255,255,255,0.92)', 34, 18, 12, 18);
+      return;
+    }
 
-      if(reelTextStyleEl.value === 'below'){
-        const boxX = photoX;
-        const boxY = photoY + photoH + 18;
-        const boxW = photoW;
-        const boxH = (cardY + cardH - innerPad) - boxY;
+    if(reelTextStyleEl.value === 'below'){
+      // Text box below photo
+      const boxX = photoX;
+      const boxY = photoY + photoH + 18;
+      const boxW = photoW;
+      const boxH = (cardY + cardH - innerPad) - boxY;
 
-        ctx.fillStyle = 'rgba(0,0,0,0.35)';
-        drawRoundedRect(ctx, boxX, boxY, boxW, boxH, 28);
-        ctx.fill();
+      // cleaner box
+      ctx.fillStyle = 'rgba(20,22,28,0.78)';
+      drawRoundedRect(ctx, boxX, boxY, boxW, boxH, 28);
+      ctx.fill();
 
-        const g = ctx.createLinearGradient(0, boxY, 0, boxY + boxH);
-        g.addColorStop(0, 'rgba(255,255,255,0.06)');
-        g.addColorStop(1, 'rgba(255,255,255,0.02)');
-        ctx.fillStyle = g;
-        drawRoundedRect(ctx, boxX, boxY, boxW, boxH, 28);
-        ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+      ctx.lineWidth = 2;
+      drawRoundedRect(ctx, boxX, boxY, boxW, boxH, 28);
+      ctx.stroke();
 
-        const padX = 28;
-        const maxW = boxW - padX*2;
-        const lines = wrapMarkupText(mainTextEl.value || "", maxW, size);
-        const lineH = Math.round(size * 1.25);
+      // chips inside textbox
+      const pad = 20;
+      const chipTopY = boxY + 16;
 
-        let y = boxY + 46 + Number(textOffsetEl.value || 0);
-
-        textShadow();
-        ctx.fillStyle = 'rgba(255,255,255,0.92)';
-        ctx.textBaseline = 'alphabetic';
-        ctx.textAlign = 'left';
-        for(const runs of lines){
-          if(y > boxY + boxH - 18) break;
-          if(runs.length === 1 && runs[0].text === "") { y += lineH; continue; }
-          drawRuns(runs, boxX + padX, y, size);
-          y += lineH;
-        }
-        clearShadow();
+      if(reelChipLayoutEl.value === 'stack'){
+        drawChip(status, boxX + pad, chipTopY, 'tl',
+          statusColorEl.value || '#2bd576', 'rgba(0,0,0,0.72)', 36, 20, 12, 999);
+        drawChip("📞 " + phone, boxX + boxW - pad, chipTopY, 'tr',
+          'rgba(0,0,0,0.45)', 'rgba(255,255,255,0.92)', 34, 18, 12, 999);
+        drawChip(price, boxX + boxW - pad, boxY + 16 + 68, 'tr',
+          'rgba(0,0,0,0.55)', 'rgba(255,255,255,0.92)', 36, 20, 12, 18);
       } else {
-        // overlay on photo bottom
-        const boxH = Math.round(photoH * 0.26);
-        const boxX = photoX, boxY = photoY + photoH - boxH, boxW = photoW;
-
-        ctx.save();
-        drawRoundedRect(ctx, photoX, photoY, photoW, photoH, Math.max(18, radius - 12));
-        ctx.clip();
-        const g = ctx.createLinearGradient(0, boxY, 0, boxY + boxH);
-        g.addColorStop(0, 'rgba(0,0,0,0.00)');
-        g.addColorStop(1, 'rgba(0,0,0,0.52)');
-        ctx.fillStyle = g;
-        ctx.fillRect(boxX, boxY, boxW, boxH);
-        ctx.restore();
-
-        const padX = 26;
-        const maxW = boxW - padX*2;
-        const lines = wrapMarkupText(mainTextEl.value || "", maxW, size);
-        const lineH = Math.round(size * 1.22);
-
-        let y = boxY + 44 + Number(textOffsetEl.value || 0);
-
-        textShadow();
-        ctx.fillStyle = 'rgba(255,255,255,0.92)';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'alphabetic';
-        for(const runs of lines){
-          if(y > photoY + photoH - 16) break;
-          if(runs.length === 1 && runs[0].text === "") { y += lineH; continue; }
-          drawRuns(runs, boxX + padX, y, size);
-          y += lineH;
-        }
-        clearShadow();
+        // row-ish: pill left, phone right, price right below
+        drawChip(status, boxX + pad, chipTopY, 'tl',
+          statusColorEl.value || '#2bd576', 'rgba(0,0,0,0.72)', 36, 20, 12, 999);
+        drawChip("📞 " + phone, boxX + boxW - pad, chipTopY, 'tr',
+          'rgba(0,0,0,0.45)', 'rgba(255,255,255,0.92)', 34, 18, 12, 999);
+        drawChip(price, boxX + boxW - pad, chipTopY + 62, 'tr',
+          'rgba(0,0,0,0.55)', 'rgba(255,255,255,0.92)', 36, 20, 12, 18);
       }
+
+      // text starts below chips
+      const textPadX = 28;
+      const maxW = boxW - textPadX*2;
+      const lines = wrapMarkupText(mainTextEl.value || "", maxW, size);
+      const lineH = Math.round(size * 1.25);
+
+      let y = boxY + 46 + 110 + Number(textOffsetEl.value || 0);
+
+      textShadow();
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      ctx.textBaseline = 'alphabetic';
+      ctx.textAlign = 'left';
+      for(const runs of lines){
+        if(y > boxY + boxH - 18) break;
+        if(runs.length === 1 && runs[0].text === "") { y += lineH; continue; }
+        drawRuns(runs, boxX + textPadX, y, size);
+        y += lineH;
+      }
+      clearShadow();
+
+    } else {
+      // Overlay box on photo bottom, chips inside overlay
+      const overlayH = Math.round(photoH * 0.30);
+      const boxX = photoX;
+      const boxY = photoY + photoH - overlayH;
+      const boxW = photoW;
+      const boxH = overlayH;
+
+      ctx.save();
+      drawRoundedRect(ctx, photoX, photoY, photoW, photoH, Math.max(18, radius - 12));
+      ctx.clip();
+      ctx.fillStyle = 'rgba(20,22,28,0.62)';
+      ctx.fillRect(boxX, boxY, boxW, boxH);
+      ctx.restore();
+
+      const pad = 18;
+      drawChip(status, boxX + pad, boxY + pad, 'tl',
+        statusColorEl.value || '#2bd576', 'rgba(0,0,0,0.72)', 32, 18, 10, 999);
+      drawChip("📞 " + phone, boxX + boxW - pad, boxY + pad, 'tr',
+        'rgba(0,0,0,0.45)', 'rgba(255,255,255,0.92)', 30, 16, 10, 999);
+      drawChip(price, boxX + boxW - pad, boxY + boxH - pad, 'br',
+        'rgba(0,0,0,0.55)', 'rgba(255,255,255,0.92)', 32, 18, 10, 18);
+
+      const textPadX = 22;
+      const maxW = boxW - textPadX*2;
+      const lines = wrapMarkupText(mainTextEl.value || "", maxW, size);
+      const lineH = Math.round(size * 1.18);
+
+      let y = boxY + 44 + 70 + Number(textOffsetEl.value || 0);
+
+      textShadow();
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+      for(const runs of lines){
+        if(y > boxY + boxH - 14) break;
+        if(runs.length === 1 && runs[0].text === "") { y += lineH; continue; }
+        drawRuns(runs, boxX + textPadX, y, size);
+        y += lineH;
+      }
+      clearShadow();
     }
   }
 
@@ -650,20 +660,24 @@
     drawBlurBG(img, W, H);
 
     const pad = 24;
-    const barH = Number(barHEl.value || 220);
-    const photoR = Number(classicPhotoREl.value || 22);
 
-    const photoX = pad, photoY = pad, photoW = W - pad*2;
-    const photoH = H - barH - pad - 12;
+    // Photo a bit smaller for more text space
+    const photoScale = Number(photoH43El.value || 0.58); // fraction of height
+    const photoW = W - pad*2;
+    const photoX = pad;
+    const photoY = pad;
+    const photoH = Math.round(H * photoScale);
+
+    const photoR = Number(classicPhotoREl.value || 22);
 
     // Photo cover + motion
     const baseFit = fitRect(img.naturalWidth, img.naturalHeight, photoW, photoH, 'cover');
     const useMotion = (motionEl.value === 'photo');
-    const strength = Number(zoomEl.value || 4) / 100;
+    const strength  = Number(zoomEl.value || 4) / 100;
 
-    const z = useMotion ? (1 + strength * t) : 1;
+    const z    = useMotion ? (1 + strength * t) : 1;
     const panX = useMotion ? ((t - 0.5) * 18) : 0;
-    const panY = useMotion ? ((0.5 - t) * 8) : 0;
+    const panY = useMotion ? ((0.5 - t) * 8)  : 0;
 
     const drawW = baseFit.w * z;
     const drawH = baseFit.h * z;
@@ -677,85 +691,79 @@
     ctx.drawImage(img, dx, dy, drawW, drawH);
     ctx.restore();
 
-    // Bar
-    const barX = pad;
-    const barY = photoY + photoH + 12;
-    const barW = W - pad*2;
-
-    ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    drawRoundedRect(ctx, barX, barY, barW, barH, 22);
-    ctx.fill();
-
-    const g = ctx.createLinearGradient(0, barY, 0, barY + barH);
-    g.addColorStop(0,'rgba(255,255,255,0.06)');
-    g.addColorStop(1,'rgba(255,255,255,0.02)');
-    ctx.fillStyle = g;
-    drawRoundedRect(ctx, barX, barY, barW, barH, 22);
-    ctx.fill();
-
-    const leftX = barX + 26;
-    const rightX = barX + barW - 26;
-    const topY = barY + 18;
-    const botY = barY + barH - 18;
-
+    // Chips ON PHOTO
     const status = (statusEl.value || "").trim();
     const phone  = (phoneEl.value || "").trim();
     const price  = (priceEl.value || "").trim();
 
-    // Pill (bar top)
-    drawChip(status,
-      cPillPosEl.value === 'tr' ? rightX : leftX,
-      topY,
-      cPillPosEl.value,
-      statusColorEl.value || '#2bd576',
-      'rgba(0,0,0,0.75)',
-      26, 18, 12, 999
+    const safe = 16;
+    const tl = {x: photoX + safe, y: photoY + safe, a:'tl'};
+    const tr = {x: photoX + photoW - safe, y: photoY + safe, a:'tr'};
+    const bl = {x: photoX + safe, y: photoY + photoH - safe, a:'bl'};
+    const br = {x: photoX + photoW - safe, y: photoY + photoH - safe, a:'br'};
+
+    const pickTop = (pos) => (pos === 'tl' ? tl : tr);
+    const pickBot = (pos) => (pos === 'bl' ? bl : br);
+
+    const pillPos = pickTop(cPillPosEl.value);
+    drawChip(status, pillPos.x, pillPos.y, pillPos.a,
+      statusColorEl.value || '#2bd576', 'rgba(0,0,0,0.72)',
+      30, 18, 10, 999
     );
 
-    // Phone (bar top-right default)
-    drawChip("📞 " + phone,
-      cPhonePosEl.value === 'tr' ? rightX : leftX,
-      topY + 62,
-      cPhonePosEl.value,
-      'rgba(0,0,0,0.45)',
-      'rgba(255,255,255,0.92)',
-      24, 16, 12, 999
+    const phonePos = pickTop(cPhonePosEl.value);
+    drawChip("📞 " + phone, phonePos.x, phonePos.y, phonePos.a,
+      'rgba(0,0,0,0.45)', 'rgba(255,255,255,0.92)',
+      28, 16, 10, 999
     );
 
-    // Price (bar bottom-right default)
-    drawChip(price,
-      cPricePosEl.value === 'br' ? rightX : leftX,
-      botY,
-      cPricePosEl.value,
-      'rgba(0,0,0,0.55)',
-      'rgba(255,255,255,0.92)',
-      26, 18, 12, 18
+    const pricePos = pickBot(cPricePosEl.value);
+    drawChip(price, pricePos.x, pricePos.y, pricePos.a,
+      'rgba(0,0,0,0.55)', 'rgba(255,255,255,0.92)',
+      30, 18, 10, 18
     );
 
-    // Text (bar)
-    if(showTextEl.value === 'yes'){
-      const size = Number(textSizeEl.value || 28);
-      const maxW = barW - 52;
-      const lines = wrapMarkupText(mainTextEl.value || "", maxW, size);
-      const lineH = Math.round(size * 1.22);
+    // Clean textbox BELOW photo, narrower than photo
+    if(showTextEl.value !== 'yes') return;
 
-      let x = leftX;
-      if(cTextPosEl.value === 'center') x = barX + Math.round(barW * 0.25);
+    const boxSideInset = Number(boxInsetEl.value || 64); // makes box end before photo edges
+    const boxX = photoX + boxSideInset;
+    const boxW = photoW - boxSideInset*2;
+    const gap = 18;
+    const boxY = photoY + photoH + gap;
 
-      let y = barY + Math.round(barH * 0.60) + Number(textOffsetEl.value || 0);
+    const bottomPad = 24;
+    const boxH = (H - bottomPad) - boxY;
 
-      textShadow();
-      ctx.fillStyle = 'rgba(255,255,255,0.90)';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'alphabetic';
-      for(const runs of lines){
-        if(y > barY + barH - 18) break;
-        if(runs.length === 1 && runs[0].text === "") { y += lineH; continue; }
-        drawRuns(runs, x, y, size);
-        y += lineH;
-      }
-      clearShadow();
+    ctx.fillStyle = 'rgba(20,22,28,0.82)';
+    drawRoundedRect(ctx, boxX, boxY, boxW, boxH, 22);
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 2;
+    drawRoundedRect(ctx, boxX, boxY, boxW, boxH, 22);
+    ctx.stroke();
+
+    const size = Number(textSizeEl.value || 28);
+    const padX = 24;
+    const maxW = boxW - padX*2;
+    const lines = wrapMarkupText(mainTextEl.value || "", maxW, size);
+    const lineH = Math.round(size * 1.25);
+
+    let y = boxY + 46 + Number(textOffsetEl.value || 0);
+
+    textShadow();
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+
+    for(const runs of lines){
+      if(y > boxY + boxH - 18) break;
+      if(runs.length === 1 && runs[0].text === "") { y += lineH; continue; }
+      drawRuns(runs, boxX + padX, y, size);
+      y += lineH;
     }
+    clearShadow();
   }
 
   function drawFrame(img, t){
@@ -920,8 +928,8 @@
     statusEl, statusColorEl, phoneEl, priceEl,
     mainTextEl, textSizeEl, textOffsetEl, showTextEl,
     motionEl, zoomEl,
-    reelPillPosEl, reelPhonePosEl, reelPricePosEl, reelTextStyleEl, reelRadiusEl, reelPadEl,
-    cPillPosEl, cPhonePosEl, cPricePosEl, cTextPosEl, barHEl, classicPhotoREl
+    reelTextStyleEl, reelRadiusEl, reelPadEl, reelChipLayoutEl,
+    cPillPosEl, cPhonePosEl, cPricePosEl, boxInsetEl, photoH43El, classicPhotoREl
   ].forEach(el => { el.addEventListener('input', redraw); el.addEventListener('change', redraw); });
 
   // init
